@@ -1,27 +1,27 @@
 # Feature 6.1 — Usage Dashboard
 
 ## Overview
-The Usage Dashboard brings structured analytics to Flow so users can understand how dictation impacts their daily workflow. It aggregates per-session data into daily metrics, estimates time saved vs. typing, surfaces top applications, and tracks usage streaks. The dashboard ships as the first tab inside Settings and is powered by the `AnalyticsManager` for persistence and calculations.
+The Usage Dashboard brings structured analytics to FnScribe so users can understand how dictation impacts their daily workflow. It aggregates per-session data into daily metrics, estimates time saved vs. typing, surfaces top applications, and tracks usage streaks. The dashboard ships as the first tab inside Settings and is powered by the `AnalyticsManager` for persistence and calculations.
 
 ## Key Components
 | Component | Location | Responsibility |
 |-----------|----------|----------------|
-| `UsageMetrics` | `Flow/Domain/Models/UsageMetrics.swift` | Codable data model storing daily aggregates, lifetime totals, per-app stats, and streak data |
-| `AnalyticsManager` | `Flow/Application/Managers/AnalyticsManager.swift` | Records sessions, persists metrics (`usage_metrics.json`), exposes queries for the dashboard |
-| `UsageDashboardView` | `Flow/Presentation/Dashboard/UsageDashboardView.swift` | Main SwiftUI view combining period picker, metric cards, chart, app breakdown, streak section |
-| `MetricCardView` | `Flow/Presentation/Dashboard/MetricCardView.swift` | Reusable card component with icon, value, subtitle, and trend badge |
-| `UsageChartView` | `Flow/Presentation/Dashboard/UsageChartView.swift` | Swift Charts bar visualization with metric toggle (words / sessions / time saved) |
-| `AppBreakdownView` | `Flow/Presentation/Dashboard/AppBreakdownView.swift` | Lists top apps plus relative share of sessions |
+| `UsageMetrics` | `FnScribe/Domain/Models/UsageMetrics.swift` | Codable data model storing daily aggregates, lifetime totals, per-app stats, and streak data |
+| `AnalyticsManager` | `FnScribe/Application/Managers/AnalyticsManager.swift` | Records sessions, persists metrics (`usage_metrics.json`), exposes queries for the dashboard |
+| `UsageDashboardView` | `FnScribe/Presentation/Dashboard/UsageDashboardView.swift` | Main SwiftUI view combining period picker, metric cards, chart, app breakdown, streak section |
+| `MetricCardView` | `FnScribe/Presentation/Dashboard/MetricCardView.swift` | Reusable card component with icon, value, subtitle, and trend badge |
+| `UsageChartView` | `FnScribe/Presentation/Dashboard/UsageChartView.swift` | Swift Charts bar visualization with metric toggle (words / sessions / time saved) |
+| `AppBreakdownView` | `FnScribe/Presentation/Dashboard/AppBreakdownView.swift` | Lists top apps plus relative share of sessions |
 
-## Data Flow
+## Data Pipeline
 1. When a transcription completes, `AppDependencies` creates a `TranscriptionSession`, informs `SessionManager`, then calls `analyticsManager.recordSession(_:)`.
 2. `AnalyticsManager` calculates time saved (difference between typing @ 40 WPM and dictation @ 150 WPM) and delegates storage to `UsageMetrics`.
-3. `UsageMetrics` updates lifetime totals, daily aggregates, per-app breakdown, and streak counters. Data persists to `~/Library/Application Support/Flow/usage_metrics.json`.
+3. `UsageMetrics` updates lifetime totals, daily aggregates, per-app breakdown, and streak counters. Data persists to `~/Library/Application Support/FnScribe/usage_metrics.json`.
 4. `UsageDashboardView` reads from the shared `analyticsManager`, showing live metrics whenever the Settings window is open.
 
 ## Settings Integration
 - `SettingsView` now requires an `AnalyticsManager` instance and exposes the dashboard as the first tab (`Label("Dashboard", systemImage: "chart.bar.fill")`).
-- `SettingsWindowController` and the `Settings {}` scene in `FlowApp` inject the shared manager from `AppDependencies` so both the Settings window and previews work.
+- `SettingsWindowController` and the `Settings {}` scene in `FnScribeApp` inject the shared manager from `AppDependencies` so both the Settings window and previews work.
 
 ## UI Sections
 ### 1. Period Picker

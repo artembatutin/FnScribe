@@ -3,7 +3,7 @@
 _Last updated: 2026-02-02_
 
 ## Overview
-The Snippets Library delivers voice-triggered text expansion inside Flow. Users speak a trigger phrase (e.g., "react component"), and Flow replaces that phrase with rich text that may contain placeholders such as `{date}` or `{cursor}`. Snippets participate in the same transcription pipeline as dictionaries, syntax transforms, and file tagging, ensuring downstream editors receive fully expanded text with cursor placement metadata.
+The Snippets Library delivers voice-triggered text expansion inside FnScribe. Users speak a trigger phrase (e.g., "react component"), and FnScribe replaces that phrase with rich text that may contain placeholders such as `{date}` or `{cursor}`. Snippets participate in the same transcription pipeline as dictionaries, syntax transforms, and file tagging, ensuring downstream editors receive fully expanded text with cursor placement metadata.
 
 Pipeline segment:
 ```
@@ -20,22 +20,22 @@ Highlights
 | Component | Location | Responsibility |
 |-----------|----------|----------------|
 | `Snippet` | `Domain/Models/Snippet.swift` | Data model with categories, metadata, placeholder catalog, and usage stats. |
-| `SnippetStore` | `Application/Stores/SnippetStore.swift` | Actor-based persistence layer (JSON file under `~/Library/Application Support/Flow/snippets.json`). |
+| `SnippetStore` | `Application/Stores/SnippetStore.swift` | Actor-based persistence layer (JSON file under `~/Library/Application Support/FnScribe/snippets.json`). |
 | `SnippetManager` | `Application/Managers/SnippetManager.swift` | CRUD, filtering, trigger detection, placeholder resolution, built-in seed data. |
 | `PlaceholderResolver` | `Infrastructure/Snippets/PlaceholderResolver.swift` | Replaces placeholders, captures cursor index, reads clipboard/app context. |
 | `SnippetsSettingsView` | `Presentation/Snippets/SnippetsSettingsView.swift` | Settings tab container (toggles, search, filters, import/export, list view). |
 | `SnippetRowView` | `Presentation/Snippets/SnippetRowView.swift` | Row renderer with enable toggle, preview sheet, duplication, edit shortcuts. |
 | `SnippetEditorView` | `Presentation/Snippets/SnippetEditorView.swift` | Add/edit sheet with placeholder chips, validation, delete confirmation. |
-| Integration | `Application/AppDependencies.swift`, `FlowApp.swift`, `SettingsStore.swift`, `Presentation/Settings/SettingsView.swift` | Wires manager into pipeline, exposes AppStorage toggle, injects environment objects, adds Settings tab. |
+| Integration | `Application/AppDependencies.swift`, `FnScribeApp.swift`, `SettingsStore.swift`, `Presentation/Settings/SettingsView.swift` | Wires manager into pipeline, exposes AppStorage toggle, injects environment objects, adds Settings tab. |
 
 ## Settings & Environment
 `SettingsStore` introduces `@AppStorage("snippetsEnabled")` (default `true`). When disabled, the pipeline skips snippet detection/expansion.
 
 `AppDependencies` creates a singleton `SnippetManager`, feeds it into SwiftUI environment objects, and inserts `snippetManager.processText(_:bundleId:)` after file tagging inside `stopRecordingAndTranscribe()`. The target app's bundle identifier is passed to enforce per-app restrictions.
 
-FlowApp propagates `snippetManager` to Menu Bar, Onboarding, and Settings scenes so the UI can access live data.
+FnScribeApp propagates `snippetManager` to Menu Bar, Onboarding, and Settings scenes so the UI can access live data.
 
-## UI/UX Flow
+## UI/UX Journey
 1. Open **Settings → Snippets** (new tab between Dictionary and File Tagging).
 2. Use the header toggles to enable/disable snippets globally.
 3. Search snippets via the inline search bar; filter by category (email, code, meeting, personal, work, custom).
@@ -79,7 +79,7 @@ Resolution order: date/time → app → clipboard → selected text → cursor t
 Loading built-ins (via the overflow menu or by calling `loadBuiltInSnippets()`) is idempotent—they only add snippets whose triggers are absent.
 
 ## Persistence & Import/Export
-- Data lives at `~/Library/Application Support/Flow/snippets.json` managed by `SnippetStore`. The actor caches data in memory to minimize disk access.
+- Data lives at `~/Library/Application Support/FnScribe/snippets.json` managed by `SnippetStore`. The actor caches data in memory to minimize disk access.
 - Import supports merge semantics by default; duplicate triggers are ignored unless "Replace" behavior is added later.
 - Export writes prettified JSON arrays of `Snippet` objects (same schema as storage) enabling easy sync or sharing.
 

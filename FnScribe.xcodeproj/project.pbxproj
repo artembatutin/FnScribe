@@ -1,0 +1,745 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0F2000010000000000000001 /* AppBranding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1000010000000000000001 /* AppBranding.swift */; };
+		0F2000020000000000000002 /* AnalyticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1000020000000000000002 /* AnalyticsManager.swift */; };
+		0F2000030000000000000003 /* TaskManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1000030000000000000003 /* TaskManager.swift */; };
+		0F2000040000000000000004 /* TaskModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1000040000000000000004 /* TaskModels.swift */; };
+		0F2000050000000000000005 /* TranscriptionSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1000050000000000000005 /* TranscriptionSession.swift */; };
+		0F2000060000000000000006 /* UsageMetrics.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1000060000000000000006 /* UsageMetrics.swift */; };
+		0F2000070000000000000007 /* TaskCaptureService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1000070000000000000007 /* TaskCaptureService.swift */; };
+		0F2000080000000000000008 /* TranscriptionSanitizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1000080000000000000008 /* TranscriptionSanitizer.swift */; };
+		1D3E71DE1921EF339B502FDA /* TaskCaptureServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06177123F5F32E8B1148C7AF /* TaskCaptureServiceTests.swift */; };
+		3C7B7DE80AC4ACC8CA7B3406 /* TranscriptionAndAnalyticsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9A66511822B81CD1C02203B /* TranscriptionAndAnalyticsTests.swift */; };
+		449482D25830F67E8BD5F3CD /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C5764133FE552ED5D6D66AC3 /* XCTest.framework */; };
+		4F5701010000000000000001 /* FnScribeWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F5702010000000000000001 /* FnScribeWidget.swift */; };
+		4F5701020000000000000002 /* FnScribeWidgetBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F5702020000000000000002 /* FnScribeWidgetBundle.swift */; };
+		4F5701030000000000000003 /* FnScribeWidgetIntents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F5702030000000000000003 /* FnScribeWidgetIntents.swift */; };
+		4F5701040000000000000004 /* SharedTaskWorkspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F5702040000000000000004 /* SharedTaskWorkspace.swift */; };
+		4F5701050000000000000005 /* TaskModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F5702080000000000000008 /* TaskModels.swift */; };
+		4F5701060000000000000006 /* FnScribeWidget.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 4F5702050000000000000005 /* FnScribeWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4F5701080000000000000008 /* SharedTaskWorkspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F5702040000000000000004 /* SharedTaskWorkspace.swift */; };
+		E6CF91692F29ABA300EFDE32 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = E6CF91022F29B00000EFDE32 /* WhisperKit */; };
+		E6CF916A2F29ABA300EFDE32 /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = E6CF91032F29B00000EFDE32 /* HotKey */; };
+		EFA2DD55BA1485D198950709 /* TaskManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3958524BB66BF9F15095DD9E /* TaskManagerTests.swift */; };
+		FE67EA592F39834AAB29D3EE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E12B11F115F47F8C0B10AACD /* Cocoa.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0F1000010000000000000001 /* AppBranding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FnScribe/Application/AppBranding.swift; sourceTree = "<group>"; };
+		0F1000020000000000000002 /* AnalyticsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FnScribe/Application/Managers/AnalyticsManager.swift; sourceTree = "<group>"; };
+		0F1000030000000000000003 /* TaskManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FnScribe/Application/Managers/TaskManager.swift; sourceTree = "<group>"; };
+		0F1000040000000000000004 /* TaskModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FnScribe/Domain/Models/TaskModels.swift; sourceTree = "<group>"; };
+		0F1000050000000000000005 /* TranscriptionSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FnScribe/Domain/Models/TranscriptionSession.swift; sourceTree = "<group>"; };
+		0F1000060000000000000006 /* UsageMetrics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FnScribe/Domain/Models/UsageMetrics.swift; sourceTree = "<group>"; };
+		0F1000070000000000000007 /* TaskCaptureService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FnScribe/Domain/Services/TaskCaptureService.swift; sourceTree = "<group>"; };
+		0F1000080000000000000008 /* TranscriptionSanitizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FnScribe/Infrastructure/Speech/TranscriptionSanitizer.swift; sourceTree = "<group>"; };
+		06177123F5F32E8B1148C7AF /* TaskCaptureServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TaskCaptureServiceTests.swift; path = FnScribeTests/TaskCaptureServiceTests.swift; sourceTree = "<group>"; };
+		3958524BB66BF9F15095DD9E /* TaskManagerTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TaskManagerTests.swift; path = FnScribeTests/TaskManagerTests.swift; sourceTree = "<group>"; };
+		4F5702010000000000000001 /* FnScribeWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FnScribeWidget/FnScribeWidget.swift; sourceTree = "<group>"; };
+		4F5702020000000000000002 /* FnScribeWidgetBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FnScribeWidget/FnScribeWidgetBundle.swift; sourceTree = "<group>"; };
+		4F5702030000000000000003 /* FnScribeWidgetIntents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FnScribeWidget/FnScribeWidgetIntents.swift; sourceTree = "<group>"; };
+		4F5702040000000000000004 /* SharedTaskWorkspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FnScribe/Domain/Services/SharedTaskWorkspace.swift; sourceTree = "<group>"; };
+		4F5702050000000000000005 /* FnScribeWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FnScribeWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F5702060000000000000006 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = FnScribeWidget/Info.plist; sourceTree = "<group>"; };
+		4F5702070000000000000007 /* FnScribeWidget.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FnScribeWidget/FnScribeWidget.entitlements; sourceTree = "<group>"; };
+		4F5702080000000000000008 /* TaskModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FnScribe/Domain/Models/TaskModels.swift; sourceTree = "<group>"; };
+		6AD6AAEC44275A4AA3D61636 /* FnScribeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FnScribeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		A9A66511822B81CD1C02203B /* TranscriptionAndAnalyticsTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TranscriptionAndAnalyticsTests.swift; path = FnScribeTests/TranscriptionAndAnalyticsTests.swift; sourceTree = "<group>"; };
+		C5764133FE552ED5D6D66AC3 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk/System/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
+		E12B11F115F47F8C0B10AACD /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
+		E6CF90ED2F29AA4F00EFDE32 /* FnScribe.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FnScribe.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		E6CF91702F29ABA400EFDE32 /* Exceptions for "FnScribe" folder in "FnScribe" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Resources/Info.plist,
+			);
+			target = E6CF90EC2F29AA4F00EFDE32 /* FnScribe */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		E6CF90EF2F29AA4F00EFDE32 /* FnScribe */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				E6CF91702F29ABA400EFDE32 /* Exceptions for "FnScribe" folder in "FnScribe" target */,
+			);
+			path = FnScribe;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXContainerItemProxy section */
+		4F5703010000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E6CF90E52F29AA4F00EFDE32 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4F5706010000000000000001;
+			remoteInfo = FnScribeWidget;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		4F5704010000000000000001 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				4F5701060000000000000006 /* FnScribeWidget.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		6108A4115C62EE49385890A0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FE67EA592F39834AAB29D3EE /* Cocoa.framework in Frameworks */,
+				449482D25830F67E8BD5F3CD /* XCTest.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4F5708020000000000000002 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E6CF90EA2F29AA4F00EFDE32 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E6CF916A2F29ABA300EFDE32 /* HotKey in Frameworks */,
+				E6CF91692F29ABA300EFDE32 /* WhisperKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		3F2AB69AC1185A69F3AF0692 /* OS X */ = {
+			isa = PBXGroup;
+			children = (
+				E12B11F115F47F8C0B10AACD /* Cocoa.framework */,
+				C5764133FE552ED5D6D66AC3 /* XCTest.framework */,
+			);
+			name = "OS X";
+			sourceTree = "<group>";
+		};
+		697EB67328D610C9B5104A7D /* FnScribeTests */ = {
+			isa = PBXGroup;
+			children = (
+				0F1000010000000000000001 /* AppBranding.swift */,
+				0F1000020000000000000002 /* AnalyticsManager.swift */,
+				0F1000030000000000000003 /* TaskManager.swift */,
+				4F5702080000000000000008 /* TaskModels.swift */,
+				0F1000050000000000000005 /* TranscriptionSession.swift */,
+				0F1000060000000000000006 /* UsageMetrics.swift */,
+				0F1000070000000000000007 /* TaskCaptureService.swift */,
+				0F1000080000000000000008 /* TranscriptionSanitizer.swift */,
+				06177123F5F32E8B1148C7AF /* TaskCaptureServiceTests.swift */,
+				3958524BB66BF9F15095DD9E /* TaskManagerTests.swift */,
+				A9A66511822B81CD1C02203B /* TranscriptionAndAnalyticsTests.swift */,
+			);
+			name = FnScribeTests;
+			sourceTree = "<group>";
+		};
+		4F5705010000000000000001 /* FnScribeWidget */ = {
+			isa = PBXGroup;
+			children = (
+				4F5702010000000000000001 /* FnScribeWidget.swift */,
+				4F5702020000000000000002 /* FnScribeWidgetBundle.swift */,
+				4F5702030000000000000003 /* FnScribeWidgetIntents.swift */,
+				4F5702060000000000000006 /* Info.plist */,
+				4F5702070000000000000007 /* FnScribeWidget.entitlements */,
+				4F5702040000000000000004 /* SharedTaskWorkspace.swift */,
+				0F1000040000000000000004 /* TaskModels.swift */,
+			);
+			name = FnScribeWidget;
+			sourceTree = "<group>";
+		};
+		E6CF90E42F29AA4F00EFDE32 = {
+			isa = PBXGroup;
+			children = (
+				E6CF90EF2F29AA4F00EFDE32 /* FnScribe */,
+				4F5705010000000000000001 /* FnScribeWidget */,
+				E6CF90EE2F29AA4F00EFDE32 /* Products */,
+				FAABCB33E1F1238EECD435FC /* Frameworks */,
+				697EB67328D610C9B5104A7D /* FnScribeTests */,
+			);
+			sourceTree = "<group>";
+		};
+		E6CF90EE2F29AA4F00EFDE32 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E6CF90ED2F29AA4F00EFDE32 /* FnScribe.app */,
+				4F5702050000000000000005 /* FnScribeWidget.appex */,
+				6AD6AAEC44275A4AA3D61636 /* FnScribeTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		FAABCB33E1F1238EECD435FC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				3F2AB69AC1185A69F3AF0692 /* OS X */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		752CD3522CAE1E98F6CD57A3 /* FnScribeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F29711FF64A61B3C682E7AC1 /* Build configuration list for PBXNativeTarget "FnScribeTests" */;
+			buildPhases = (
+				267AA39B3A21162F1D8C0096 /* Sources */,
+				6108A4115C62EE49385890A0 /* Frameworks */,
+				F44C0539FB053A05CBD85926 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FnScribeTests;
+			productName = FnScribeTests;
+			productReference = 6AD6AAEC44275A4AA3D61636 /* FnScribeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		E6CF90EC2F29AA4F00EFDE32 /* FnScribe */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E6CF90FA2F29AA5100EFDE32 /* Build configuration list for PBXNativeTarget "FnScribe" */;
+			buildPhases = (
+				E6CF90E92F29AA4F00EFDE32 /* Sources */,
+				E6CF90EA2F29AA4F00EFDE32 /* Frameworks */,
+				E6CF90EB2F29AA4F00EFDE32 /* Resources */,
+				4F5704010000000000000001 /* Embed App Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4F5707010000000000000001 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				E6CF90EF2F29AA4F00EFDE32 /* FnScribe */,
+			);
+			name = FnScribe;
+			packageProductDependencies = (
+				E6CF91022F29B00000EFDE32 /* WhisperKit */,
+				E6CF91032F29B00000EFDE32 /* HotKey */,
+			);
+			productName = FnScribe;
+			productReference = E6CF90ED2F29AA4F00EFDE32 /* FnScribe.app */;
+			productType = "com.apple.product-type.application";
+		};
+		4F5706010000000000000001 /* FnScribeWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4F5709010000000000000001 /* Build configuration list for PBXNativeTarget "FnScribeWidget" */;
+			buildPhases = (
+				4F5708010000000000000001 /* Sources */,
+				4F5708020000000000000002 /* Frameworks */,
+				4F5708030000000000000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FnScribeWidget;
+			productName = FnScribeWidget;
+			productReference = 4F5702050000000000000005 /* FnScribeWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E6CF90E52F29AA4F00EFDE32 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2620;
+				LastUpgradeCheck = 2620;
+				TargetAttributes = {
+					752CD3522CAE1E98F6CD57A3 = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					4F5706010000000000000001 = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					E6CF90EC2F29AA4F00EFDE32 = {
+						CreatedOnToolsVersion = 26.2;
+					};
+				};
+			};
+			buildConfigurationList = E6CF90E82F29AA4F00EFDE32 /* Build configuration list for PBXProject "FnScribe" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = E6CF90E42F29AA4F00EFDE32;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				E6CF91002F29B00000EFDE32 /* XCRemoteSwiftPackageReference "WhisperKit" */,
+				E6CF91012F29B00000EFDE32 /* XCRemoteSwiftPackageReference "HotKey" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = E6CF90EE2F29AA4F00EFDE32 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E6CF90EC2F29AA4F00EFDE32 /* FnScribe */,
+				4F5706010000000000000001 /* FnScribeWidget */,
+				752CD3522CAE1E98F6CD57A3 /* FnScribeTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E6CF90EB2F29AA4F00EFDE32 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F44C0539FB053A05CBD85926 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4F5708030000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		267AA39B3A21162F1D8C0096 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0F2000010000000000000001 /* AppBranding.swift in Sources */,
+				0F2000020000000000000002 /* AnalyticsManager.swift in Sources */,
+				0F2000030000000000000003 /* TaskManager.swift in Sources */,
+				0F2000040000000000000004 /* TaskModels.swift in Sources */,
+				4F5701080000000000000008 /* SharedTaskWorkspace.swift in Sources */,
+				0F2000050000000000000005 /* TranscriptionSession.swift in Sources */,
+				0F2000060000000000000006 /* UsageMetrics.swift in Sources */,
+				0F2000070000000000000007 /* TaskCaptureService.swift in Sources */,
+				0F2000080000000000000008 /* TranscriptionSanitizer.swift in Sources */,
+				1D3E71DE1921EF339B502FDA /* TaskCaptureServiceTests.swift in Sources */,
+				EFA2DD55BA1485D198950709 /* TaskManagerTests.swift in Sources */,
+				3C7B7DE80AC4ACC8CA7B3406 /* TranscriptionAndAnalyticsTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E6CF90E92F29AA4F00EFDE32 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4F5708010000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4F5701020000000000000002 /* FnScribeWidgetBundle.swift in Sources */,
+				4F5701010000000000000001 /* FnScribeWidget.swift in Sources */,
+				4F5701030000000000000003 /* FnScribeWidgetIntents.swift in Sources */,
+				4F5701040000000000000004 /* SharedTaskWorkspace.swift in Sources */,
+				4F5701050000000000000005 /* TaskModels.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		4F5707010000000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4F5706010000000000000001 /* FnScribeWidget */;
+			targetProxy = 4F5703010000000000000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0C83A4705E5F64259027498B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = EJQKXF32KE;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@loader_path/../Frameworks",
+					"@loader_path/../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = quartzarts.FnScribeTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		9191D0F6326626EC1E4E495E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = EJQKXF32KE;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@loader_path/../Frameworks",
+					"@loader_path/../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = quartzarts.FnScribeTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		4F570A010000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = FnScribeWidget/FnScribeWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = EJQKXF32KE;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = FnScribeWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = quartzarts.FnScribe.FnScribeWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		4F570A020000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = FnScribeWidget/FnScribeWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = EJQKXF32KE;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = FnScribeWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = quartzarts.FnScribe.FnScribeWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		E6CF90F82F29AA5100EFDE32 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = EJQKXF32KE;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		E6CF90F92F29AA5100EFDE32 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = EJQKXF32KE;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		E6CF90FB2F29AA5100EFDE32 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = FnScribe/FnScribe.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = EJQKXF32KE;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = FnScribe/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = quartzarts.FnScribe;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		E6CF90FC2F29AA5100EFDE32 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = FnScribe/FnScribe.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = EJQKXF32KE;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = FnScribe/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = quartzarts.FnScribe;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E6CF90E82F29AA4F00EFDE32 /* Build configuration list for PBXProject "FnScribe" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E6CF90F82F29AA5100EFDE32 /* Debug */,
+				E6CF90F92F29AA5100EFDE32 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E6CF90FA2F29AA5100EFDE32 /* Build configuration list for PBXNativeTarget "FnScribe" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E6CF90FB2F29AA5100EFDE32 /* Debug */,
+				E6CF90FC2F29AA5100EFDE32 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4F5709010000000000000001 /* Build configuration list for PBXNativeTarget "FnScribeWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4F570A010000000000000001 /* Debug */,
+				4F570A020000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F29711FF64A61B3C682E7AC1 /* Build configuration list for PBXNativeTarget "FnScribeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0C83A4705E5F64259027498B /* Release */,
+				9191D0F6326626EC1E4E495E /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		E6CF91002F29B00000EFDE32 /* XCRemoteSwiftPackageReference "WhisperKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/argmaxinc/WhisperKit";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.0;
+			};
+		};
+		E6CF91012F29B00000EFDE32 /* XCRemoteSwiftPackageReference "HotKey" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/soffes/HotKey";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		E6CF91022F29B00000EFDE32 /* WhisperKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E6CF91002F29B00000EFDE32 /* XCRemoteSwiftPackageReference "WhisperKit" */;
+			productName = WhisperKit;
+		};
+		E6CF91032F29B00000EFDE32 /* HotKey */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = E6CF91012F29B00000EFDE32 /* XCRemoteSwiftPackageReference "HotKey" */;
+			productName = HotKey;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = E6CF90E52F29AA4F00EFDE32 /* Project object */;
+}

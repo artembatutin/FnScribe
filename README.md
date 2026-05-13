@@ -1,8 +1,6 @@
-# Flow
+# FnScribe
 
-A powerful macOS application that transforms your speech into intelligent, context-aware text for seamless integration with AI-powered development environments. Flow bridges the gap between voice dictation and modern IDEs, providing real-time transcription with advanced features like IDE file tagging, personal dictionaries, and syntax-aware dictation.
-
-![Flow Menu](docs/images/menu.png)
+FnScribe is an AI-powered macOS dictation app that turns speech into polished, context-aware text for writing, productivity, and coding workflows.
 
 ## 🎯 Key Features
 
@@ -28,8 +26,6 @@ A powerful macOS application that transforms your speech into intelligent, conte
 - **Snippet Library**: Store and insert frequently used code snippets via voice
 - **Usage Dashboard**: Track your dictation patterns and productivity metrics
 
-![Flow Settings](docs/images/settings.png)
-
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -42,23 +38,23 @@ A powerful macOS application that transforms your speech into intelligent, conte
 #### From Source
 1. Clone the repository:
    ```bash
-   git clone https://github.com/artembatutin/flow.git
-   cd flow
+   git clone https://github.com/artembatutin/FnScribe.git
+   cd FnScribe
    ```
 
 2. Open the project in Xcode:
    ```bash
-   open Flow.xcodeproj
+   open FnScribe.xcodeproj
    ```
 
 3. Build and run the project (⌘+R)
 
 #### From Release
-Download the latest signed DMG file from the [Releases](https://github.com/artembatutin/flow/releases) section.
+Download the latest signed DMG file from the [Releases](https://github.com/artembatutin/FnScribe/releases) section.
 
 ## 📖 Documentation
 
-Flow includes comprehensive documentation for all its features:
+FnScribe includes comprehensive documentation for all its features:
 
 - **[IDE File Tagging](docs/ide-file-tagging.md)** - Learn how to reference files in your IDE using voice commands
 - **[Personal Dictionary](docs/personal-dictionary.md)** - Customize vocabulary and transformations
@@ -69,15 +65,15 @@ Flow includes comprehensive documentation for all its features:
 
 ## 🏗️ Architecture
 
-Flow is built with a clean, modular architecture:
+FnScribe is built with a clean, modular architecture:
 
 ```
-Flow/
+FnScribe/
 ├── Application/          # App lifecycle and dependency management
 ├── Domain/              # Business logic and models
 ├── Infrastructure/      # External integrations and services
 ├── Presentation/        # UI components and views
-└── FlowApp.swift # Main app entry point
+└── FnScribeApp.swift # Main app entry point
 ```
 
 ### Core Components
@@ -91,7 +87,7 @@ Flow/
 
 ## 🔧 Configuration
 
-Flow offers extensive customization through its settings interface:
+FnScribe offers extensive customization through its settings interface:
 
 - **Audio Settings**: Microphone selection, noise reduction, sensitivity
 - **Transcription Settings**: Language, punctuation, formatting options
@@ -105,8 +101,8 @@ Flow offers extensive customization through its settings interface:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/artembatutin/flow.git
-   cd flow
+   git clone https://github.com/artembatutin/FnScribe.git
+   cd FnScribe
    ```
 
 2. **Install dependencies**
@@ -116,7 +112,7 @@ Flow offers extensive customization through its settings interface:
 
 3. **Open in Xcode**
    ```bash
-   open Flow.xcodeproj
+   open FnScribe.xcodeproj
    ```
 
 4. **Build and run in Xcode**
@@ -138,7 +134,7 @@ Flow offers extensive customization through its settings interface:
 
 ```bash
 # Run unit tests
-xcodebuild test -project Flow.xcodeproj -scheme FlowTests -destination 'platform=macOS'
+xcodebuild test -project FnScribe.xcodeproj -scheme FnScribeTests -destination 'platform=macOS'
 ```
 
 ### Contributing
@@ -151,11 +147,11 @@ We welcome issues and pull requests through GitHub.
 
 **Microphone Permission Denied**
 - Go to System Preferences → Security & Privacy → Privacy → Microphone
-- Enable Flow in the microphone access list
+- Enable FnScribe in the microphone access list
 
 **IDE Integration Not Working**
 - Ensure your IDE is supported (Cursor, Windsurf, VS Code, Xcode, JetBrains)
-- Check that accessibility permissions are enabled for Flow
+- Check that accessibility permissions are enabled for FnScribe
 - Verify workspace scanning is enabled in settings
 
 **Speech Recognition Accuracy**
@@ -171,8 +167,8 @@ We welcome issues and pull requests through GitHub.
 ### Getting Help
 
 - **Documentation**: Check the `docs/` folder for detailed feature documentation
-- **Issues**: Report bugs and request features on the [GitHub Issues](https://github.com/artembatutin/flow/issues) page
-- **Discussions**: Join community discussions in the [GitHub Discussions](https://github.com/artembatutin/flow/discussions) section
+- **Issues**: Report bugs and request features on the [GitHub Issues](https://github.com/artembatutin/FnScribe/issues) page
+- **Discussions**: Join community discussions in the [GitHub Discussions](https://github.com/artembatutin/FnScribe/discussions) section
 
 ## 📄 License
 
@@ -194,6 +190,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Made with ❤️ for the developer community**
+**Made for people who prefer speaking their thoughts into shape.**
 
-For questions, support, or to contribute, please visit the [GitHub repository](https://github.com/artembatutin/flow).
+For questions, support, or to contribute, please visit the [GitHub repository](https://github.com/artembatutin/FnScribe).

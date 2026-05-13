@@ -79,7 +79,7 @@ Disabling any sub-feature leaves the others unaffected; the transformer checks e
 - **File tagging**: Runs immediately after syntax transformation; order matters so tags see already-formatted text.
 
 ## Testing tips
-1. Build/run Flow with logging enabled (Xcode → Debug console) to inspect intermediate text states via `appState.updateTranscription`.
+1. Build/run FnScribe with logging enabled (Xcode → Debug console) to inspect intermediate text states via `appState.updateTranscription`.
 2. Speak or paste phrases into a mock pipeline harness to verify transformations without full audio capture.
 3. For regression coverage, add unit tests around the pure functions (`CaseTransformer`, `CLIPatternMatcher`, `CodePatterns`). Each component operates purely on strings, making them straightforward to test.
 
