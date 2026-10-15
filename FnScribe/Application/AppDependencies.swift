@@ -42,6 +42,9 @@ class AppDependencies {
     
     /// The target application to inject text into (captured when recording starts)
     private var targetApp: NSRunningApplication?
+    private var activeRecordingID: UUID?
+    private var isProcessingCapture = false
+    private var dictationActivity: NSObjectProtocol?
 
     private static func shouldEnableCodeSymbols(
         settingsStore: SettingsStore,
@@ -185,9 +188,7 @@ class AppDependencies {
             Task { @MainActor [weak self] in
                 guard let self = self else { return }
                 if self.audioEngine.isRecording {
-                    _ = try? self.audioEngine.stopRecording()
-                    self.appState.setIdle()
-                    self.audioFeedbackManager.playStopSound()
+                    await self.stopRecordingAndTranscribe()
                 }
             }
         }
@@ -195,13 +196,20 @@ class AppDependencies {
     
     func loadSelectedModel() async {
         let modelName = settingsStore.selectedModel
-        if modelManager.isModelDownloaded(WhisperModel.model(forName: modelName) ?? WhisperModel.availableModels[0]) {
+        guard let model = modelManager.model(forName: modelName),
+              let modelPath = modelManager.getModelPath(for: model) else {
+            speechRecognizer.unloadModel()
+            appState.isModelLoaded = false
+            return
+        }
+        appState.isModelLoaded = false
+        if !speechRecognizer.isLoading {
             do {
-                try await speechRecognizer.loadModel(name: modelName)
+                try await speechRecognizer.loadModel(name: modelName, modelPath: modelPath)
                 appState.isModelLoaded = true
             } catch {
                 appState.isModelLoaded = false
-                appState.setError("Failed to load model: \(error.localizedDescription)")
+                appState.setError(error.localizedDescription)
             }
         }
     }
@@ -224,6 +232,13 @@ class AppDependencies {
     }
     
     private func startRecording() {
+        guard !audioEngine.isRecording, !isProcessingCapture else {
+            if isProcessingCapture {
+                appState.setProcessing()
+            }
+            return
+        }
+
         guard permissionsManager.microphoneGranted else {
             appState.setError("Microphone permission not granted")
             return
@@ -237,6 +252,8 @@ class AppDependencies {
         // Capture the target app BEFORE we start recording
         // This is the app that will receive the transcribed text
         targetApp = textInjector.getFrontmostApp()
+        let recordingID = UUID()
+        activeRecordingID = recordingID
         
         // Scan workspace if file tagging is enabled and we're in an IDE
         if settingsStore.fileTaggingEnabled && settingsStore.autoScanWorkspace {
@@ -249,6 +266,12 @@ class AppDependencies {
         }
         
         do {
+            // Menu-bar apps can otherwise enter App Nap as soon as capture stops,
+            // delaying inference/injection until the next interaction with the UI.
+            dictationActivity = ProcessInfo.processInfo.beginActivity(
+                options: .userInitiated,
+                reason: "Recording and transcribing dictation"
+            )
             try audioEngine.startRecording()
             appState.setListening()
             audioFeedbackManager.playStartSound()
@@ -257,20 +280,27 @@ class AppDependencies {
             // Start streaming transcription if enabled
             if settingsStore.streamingTranscriptionEnabled {
                 Task {
-                    await startStreamingTranscription()
+                    await startStreamingTranscription(for: recordingID)
                 }
             }
         } catch {
+            activeRecordingID = nil
+            endDictationActivity()
             appState.setError("Failed to start recording: \(error.localizedDescription)")
         }
     }
     
-    private func startStreamingTranscription() async {
+    private func startStreamingTranscription(for recordingID: UUID) async {
+        guard activeRecordingID == recordingID, audioEngine.isRecording else { return }
+
         // Ensure WhisperKit is available for streaming
         if let whisperKit = speechRecognizer.whisperKit {
             streamingTranscriber.setWhisperKit(whisperKit)
             do {
                 try await streamingTranscriber.startStreaming()
+                if activeRecordingID != recordingID || !audioEngine.isRecording {
+                    _ = await streamingTranscriber.stopStreaming(shouldProcessFinalChunk: false)
+                }
             } catch {
                 // Silently fail - streaming is optional enhancement
             }
@@ -279,14 +309,28 @@ class AppDependencies {
     
     private func stopRecordingAndTranscribe() async {
         guard audioEngine.isRecording else { return }
-        
-        // Stop streaming transcription first
-        _ = await streamingTranscriber.stopStreaming()
+        let recordingID = activeRecordingID
+        let captureTargetApp = targetApp
+        activeRecordingID = nil
+        isProcessingCapture = true
+        defer {
+            isProcessingCapture = false
+            endDictationActivity()
+        }
         
         do {
             let audioBuffer = try audioEngine.stopRecording()
             appState.setProcessing()
             audioFeedbackManager.playStopSound()
+
+            // Stop the live preview after the microphone is cut. The final
+            // transcription below already processes the full captured buffer.
+            _ = await streamingTranscriber.stopStreaming(shouldProcessFinalChunk: false)
+
+            guard recordingID != nil else {
+                setIdleIfNotRecording()
+                return
+            }
             
             if let buffer = audioBuffer {
                 let result = try await speechRecognizer.transcribe(audioBuffer: buffer)
@@ -298,9 +342,9 @@ class AppDependencies {
                 }
 
                 if taskCaptureService.isTaskCommand(transcription) {
-                    try await handleTaskCapture(transcription)
+                    try await handleTaskCapture(transcription, targetApp: captureTargetApp)
                 } else {
-                    try await handleDictationCapture(transcription)
+                    try await handleDictationCapture(transcription, targetApp: captureTargetApp)
                 }
             }
             
@@ -319,7 +363,13 @@ class AppDependencies {
         appState.setIdle()
     }
 
-    private func handleTaskCapture(_ transcription: String) async throws {
+    private func endDictationActivity() {
+        guard let dictationActivity else { return }
+        ProcessInfo.processInfo.endActivity(dictationActivity)
+        self.dictationActivity = nil
+    }
+
+    private func handleTaskCapture(_ transcription: String, targetApp: NSRunningApplication?) async throws {
         let task = try taskCaptureService.createTask(from: transcription)
         appState.updateTranscription(task.title)
 
@@ -332,7 +382,7 @@ class AppDependencies {
         )
     }
 
-    private func handleDictationCapture(_ transcription: String) async throws {
+    private func handleDictationCapture(_ transcription: String, targetApp: NSRunningApplication?) async throws {
         var finalText = transcription
 
         if settingsStore.syntaxTransformEnabled {
@@ -354,7 +404,27 @@ class AppDependencies {
 
         appState.updateTranscription(finalText)
 
-        if settingsStore.autoInject && !finalText.isEmpty {
+        guard !finalText.isEmpty else { return }
+
+        let session = TranscriptionSession(
+            transcription: finalText,
+            targetApp: targetApp?.localizedName,
+            duration: Date().timeIntervalSince(sessionManager.currentSessionStartTime ?? Date()),
+            modelUsed: settingsStore.selectedModel,
+            captureKind: .dictation
+        )
+
+        // Keep the transcript available from the menu even if the target app
+        // cannot accept the automatic paste.
+        sessionManager.endSession(
+            transcription: finalText,
+            modelUsed: settingsStore.selectedModel,
+            targetApp: targetApp?.localizedName,
+            captureKind: .dictation
+        )
+        analyticsManager.recordSession(session)
+
+        if settingsStore.autoInject {
             if let target = targetApp {
                 textInjector.activateApp(target)
                 try await Task.sleep(nanoseconds: 100_000_000)
@@ -371,25 +441,6 @@ class AppDependencies {
                 correctionLearner.recordInjection(finalText)
             }
         }
-
-        guard !finalText.isEmpty else { return }
-
-        let session = TranscriptionSession(
-            transcription: finalText,
-            targetApp: targetApp?.localizedName,
-            duration: Date().timeIntervalSince(sessionManager.currentSessionStartTime ?? Date()),
-            modelUsed: settingsStore.selectedModel,
-            captureKind: .dictation
-        )
-
-        sessionManager.endSession(
-            transcription: finalText,
-            modelUsed: settingsStore.selectedModel,
-            targetApp: targetApp?.localizedName,
-            captureKind: .dictation
-        )
-
-        analyticsManager.recordSession(session)
     }
     
     func startHotkeyListening() {

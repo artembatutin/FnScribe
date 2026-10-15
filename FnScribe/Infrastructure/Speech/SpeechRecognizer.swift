@@ -17,6 +17,7 @@ enum SpeechRecognizerError: LocalizedError {
     case invalidAudioFormat
     case noAudioData
     case alreadyTranscribing
+    case alreadyLoading
     
     var errorDescription: String? {
         switch self {
@@ -32,6 +33,8 @@ enum SpeechRecognizerError: LocalizedError {
             return "No audio data to transcribe"
         case .alreadyTranscribing:
             return "Transcription is already in progress"
+        case .alreadyLoading:
+            return "Another model is still loading"
         }
     }
 }
@@ -84,10 +87,14 @@ class SpeechRecognizer: ObservableObject {
     
     // MARK: - Model Loading
     
-    func loadModel(name: String, modelPath: String? = nil) async throws {
-        guard !isLoading else { return }
+    func loadModel(name: String, modelPath: String) async throws {
+        guard !isLoading else { throw SpeechRecognizerError.alreadyLoading }
+        if isModelLoaded && currentModelName == name { return }
         
         isLoading = true
+        isModelLoaded = false
+        currentModelName = nil
+        whisperKit = nil
         loadingProgress = 0.0
         error = nil
         
@@ -96,15 +103,14 @@ class SpeechRecognizer: ObservableObject {
         }
         
         do {
-            let modelStorageDirectory = (try? AppSupportPaths.modelsDirectory()) ??
-                FileManager.default.temporaryDirectory.appendingPathComponent("FnScribeModels", isDirectory: true)
-            
             let config = WhisperKitConfig(
                 model: name,
-                downloadBase: URL(fileURLWithPath: modelStorageDirectory.path),
+                downloadBase: try? AppSupportPaths.modelsDirectory(),
+                modelFolder: modelPath,
                 verbose: false,
-                prewarm: true,
-                load: true
+                prewarm: false,
+                load: true,
+                download: false
             )
             
             whisperKit = try await WhisperKit(config)
@@ -126,6 +132,7 @@ class SpeechRecognizer: ObservableObject {
         isModelLoaded = false
         currentModelName = nil
         loadingProgress = 0.0
+        error = nil
     }
     
     // MARK: - Transcription

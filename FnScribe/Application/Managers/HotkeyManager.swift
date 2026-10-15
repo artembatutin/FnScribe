@@ -147,6 +147,7 @@ class HotkeyManager: ObservableObject {
     private var keyDownMonitor: Any?
     private var keyUpMonitor: Any?
     private var hotkeyRecordingCompletion: ((KeyCombo) -> Void)?
+    private var releaseWatchdog: Task<Void, Never>?
     
     private let settingsStore: SettingsStore
     private var triggerMode: TriggerMode { settingsStore.triggerMode }
@@ -183,6 +184,8 @@ class HotkeyManager: ObservableObject {
     }
     
     func stopListening() {
+        releaseWatchdog?.cancel()
+        releaseWatchdog = nil
         hotKey = nil
         
         if let monitor = flagsMonitor {
@@ -268,8 +271,7 @@ class HotkeyManager: ObservableObject {
             handleHotkeyDown()
         } else if !fnKeyPressed && isHotkeyPressed {
             // Fn key released
-            isHotkeyPressed = false
-            handleHotkeyUp()
+            releaseHotkeyIfNeeded()
         }
     }
     
@@ -301,15 +303,15 @@ class HotkeyManager: ObservableObject {
         
         hotKey?.keyDownHandler = { [weak self] in
             Task { @MainActor [weak self] in
-                self?.isHotkeyPressed = true
-                self?.handleHotkeyDown()
+                guard let self, !self.isHotkeyPressed else { return }
+                self.isHotkeyPressed = true
+                self.handleHotkeyDown()
             }
         }
         
         hotKey?.keyUpHandler = { [weak self] in
             Task { @MainActor [weak self] in
-                self?.isHotkeyPressed = false
-                self?.handleHotkeyUp()
+                self?.releaseHotkeyIfNeeded()
             }
         }
     }
@@ -317,6 +319,7 @@ class HotkeyManager: ObservableObject {
     // MARK: - Private Methods - Trigger Mode Handling
     
     private func handleHotkeyDown() {
+        startReleaseWatchdog()
         switch triggerMode {
         case .pushToTalk:
             // Start recording immediately on key down
@@ -331,6 +334,37 @@ class HotkeyManager: ObservableObject {
                 onHotkeyPressed?()
             } else {
                 onHotkeyReleased?()
+            }
+        }
+    }
+
+    private func releaseHotkeyIfNeeded() {
+        guard isHotkeyPressed else { return }
+        isHotkeyPressed = false
+        releaseWatchdog?.cancel()
+        releaseWatchdog = nil
+        handleHotkeyUp()
+    }
+
+    private func startReleaseWatchdog() {
+        releaseWatchdog?.cancel()
+        // Event monitors can miss key-up across focus/menu transitions. Check the
+        // physical state only while held, without relying on a run-loop timer.
+        releaseWatchdog = Task { @MainActor [weak self] in
+            while !Task.isCancelled {
+                do { try await Task.sleep(nanoseconds: 100_000_000) }
+                catch { return }
+                guard let self, self.isListening, self.isHotkeyPressed else { return }
+                let held: Bool
+                if self.currentKeyCombo.keyCode == UInt32(kVK_Function) {
+                    held = CGEventSource.flagsState(.combinedSessionState).contains(.maskSecondaryFn)
+                } else {
+                    held = CGEventSource.keyState(.combinedSessionState, key: CGKeyCode(self.currentKeyCombo.keyCode))
+                }
+                if !held {
+                    self.releaseHotkeyIfNeeded()
+                    return
+                }
             }
         }
     }

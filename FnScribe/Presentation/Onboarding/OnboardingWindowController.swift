@@ -39,6 +39,7 @@ final class OnboardingWindowController {
 
         let dependencies = AppDependencies.shared
         let onboardingView = OnboardingView {
+            dependencies.startHotkeyListening()
             OnboardingWindowController.shared.closeWindow()
         }
         .environmentObject(dependencies.settingsStore)

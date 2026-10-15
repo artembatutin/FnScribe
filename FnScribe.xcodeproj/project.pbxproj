@@ -29,6 +29,11 @@
 		E6CF916A2F29ABA300EFDE32 /* HotKey in Frameworks */ = {isa = PBXBuildFile; productRef = E6CF91032F29B00000EFDE32 /* HotKey */; };
 		EFA2DD55BA1485D198950709 /* TaskManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3958524BB66BF9F15095DD9E /* TaskManagerTests.swift */; };
 		FE67EA592F39834AAB29D3EE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E12B11F115F47F8C0B10AACD /* Cocoa.framework */; };
+		0F2000090000000000000009 /* AudioCaptureQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1000090000000000000009 /* AudioCaptureQueue.swift */; };
+		0F20000A000000000000000A /* AudioBufferConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F10000A000000000000000A /* AudioBufferConverter.swift */; };
+		0F20000B000000000000000B /* StreamingTranscript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F10000B000000000000000B /* StreamingTranscript.swift */; };
+		0F20000C000000000000000C /* ClipboardPasteTransaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F10000C000000000000000C /* ClipboardPasteTransaction.swift */; };
+		0F20000D000000000000000D /* ClipboardPasteTransactionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F10000D000000000000000D /* ClipboardPasteTransactionTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -55,6 +60,11 @@
 		C5764133FE552ED5D6D66AC3 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk/System/Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		E12B11F115F47F8C0B10AACD /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk/System/Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
 		E6CF90ED2F29AA4F00EFDE32 /* FnScribe.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FnScribe.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		0F1000090000000000000009 /* AudioCaptureQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FnScribe/Infrastructure/Audio/AudioCaptureQueue.swift; sourceTree = "<group>"; };
+		0F10000A000000000000000A /* AudioBufferConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FnScribe/Infrastructure/Audio/AudioBufferConverter.swift; sourceTree = "<group>"; };
+		0F10000B000000000000000B /* StreamingTranscript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FnScribe/Infrastructure/Speech/StreamingTranscript.swift; sourceTree = "<group>"; };
+		0F10000C000000000000000C /* ClipboardPasteTransaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FnScribe/Infrastructure/TextInjection/ClipboardPasteTransaction.swift; sourceTree = "<group>"; };
+		0F10000D000000000000000D /* ClipboardPasteTransactionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FnScribeTests/ClipboardPasteTransactionTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -151,9 +161,14 @@
 				0F1000060000000000000006 /* UsageMetrics.swift */,
 				0F1000070000000000000007 /* TaskCaptureService.swift */,
 				0F1000080000000000000008 /* TranscriptionSanitizer.swift */,
+				0F10000B000000000000000B /* StreamingTranscript.swift */,
+				0F10000A000000000000000A /* AudioBufferConverter.swift */,
+				0F1000090000000000000009 /* AudioCaptureQueue.swift */,
+				0F10000C000000000000000C /* ClipboardPasteTransaction.swift */,
 				06177123F5F32E8B1148C7AF /* TaskCaptureServiceTests.swift */,
 				3958524BB66BF9F15095DD9E /* TaskManagerTests.swift */,
 				A9A66511822B81CD1C02203B /* TranscriptionAndAnalyticsTests.swift */,
+				0F10000D000000000000000D /* ClipboardPasteTransactionTests.swift */,
 			);
 			name = FnScribeTests;
 			sourceTree = "<group>";
@@ -348,9 +363,14 @@
 				0F2000060000000000000006 /* UsageMetrics.swift in Sources */,
 				0F2000070000000000000007 /* TaskCaptureService.swift in Sources */,
 				0F2000080000000000000008 /* TranscriptionSanitizer.swift in Sources */,
+				0F20000B000000000000000B /* StreamingTranscript.swift in Sources */,
+				0F20000A000000000000000A /* AudioBufferConverter.swift in Sources */,
+				0F2000090000000000000009 /* AudioCaptureQueue.swift in Sources */,
+				0F20000C000000000000000C /* ClipboardPasteTransaction.swift in Sources */,
 				1D3E71DE1921EF339B502FDA /* TaskCaptureServiceTests.swift in Sources */,
 				EFA2DD55BA1485D198950709 /* TaskManagerTests.swift in Sources */,
 				3C7B7DE80AC4ACC8CA7B3406 /* TranscriptionAndAnalyticsTests.swift in Sources */,
+				0F20000D000000000000000D /* ClipboardPasteTransactionTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

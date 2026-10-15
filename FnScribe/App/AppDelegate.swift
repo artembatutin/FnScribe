@@ -21,16 +21,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Hide from Dock - app runs as menu bar only
         NSApp.setActivationPolicy(.accessory)
         
-        // Start hotkey listening after a short delay to ensure permissions are checked
+        // Keep setup available while an installed model prepares.
         Task { @MainActor in
-            // Load the selected model
-            await AppDependencies.shared.loadSelectedModel()
-
             // The onboarding window is AppKit-owned so it only appears until setup is complete.
             OnboardingWindowController.shared.showWindowIfNeeded()
             
             // Start listening for hotkeys if permissions are granted
             AppDependencies.shared.startHotkeyListening()
+
+            // Model preparation can take time; keep setup and settings accessible.
+            await AppDependencies.shared.loadSelectedModel()
         }
     }
     

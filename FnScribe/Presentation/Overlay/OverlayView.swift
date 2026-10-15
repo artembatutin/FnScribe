@@ -143,7 +143,7 @@ struct OverlayView: View {
         case .listening:
             return "Speak now..."
         case .processing:
-            return "Transcribing audio..."
+            return "Mic stopped. Transcribing..."
         case .error(let message):
             return message
         }

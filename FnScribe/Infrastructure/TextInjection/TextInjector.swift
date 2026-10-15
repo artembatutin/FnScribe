@@ -62,10 +62,6 @@ class TextInjector {
     /// Whether to preserve clipboard contents
     var preserveClipboard: Bool = true
     
-    // MARK: - Private Properties
-    
-    private var savedClipboardContents: [NSPasteboard.PasteboardType: Data]?
-    
     // MARK: - Keycode Mapping
     
     /// Maps characters to their virtual keycodes
@@ -231,40 +227,21 @@ class TextInjector {
         }
     }
     
-    /// Copies text to the clipboard
-    private func copyToClipboard(_ text: String) -> Bool {
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        return pasteboard.setString(text, forType: .string)
-    }
-    
     // MARK: - Injection Methods
     
     /// Injects text via clipboard paste (Cmd+V)
     private func injectViaClipboard(text: String) async throws {
-        // Save clipboard if needed
-        if preserveClipboard {
-            savedClipboardContents = saveClipboard()
-        }
-        
-        // Copy text to clipboard
-        guard copyToClipboard(text) else {
+        let transaction = ClipboardPasteTransaction(pasteboard: .general)
+        do {
+            try await transaction.paste(
+                text: text,
+                preserveClipboard: preserveClipboard,
+                focusDelay: focusDelay
+            ) {
+                simulatePaste()
+            }
+        } catch is ClipboardPasteTransactionError {
             throw TextInjectionError.clipboardOperationFailed
-        }
-        
-        // Small delay to ensure clipboard is ready
-        try await Task.sleep(nanoseconds: UInt64(focusDelay * 1_000_000_000))
-        
-        // Simulate Cmd+V
-        simulatePaste()
-        
-        // Small delay to ensure paste completes
-        try await Task.sleep(nanoseconds: 50_000_000) // 50ms
-        
-        // Restore clipboard if needed
-        if preserveClipboard {
-            restoreClipboard(savedClipboardContents)
-            savedClipboardContents = nil
         }
     }
     

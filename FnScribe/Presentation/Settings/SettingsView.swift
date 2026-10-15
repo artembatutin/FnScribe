@@ -410,92 +410,105 @@ struct ModelSettingsView: View {
     
     @State private var showDeleteConfirmation = false
     @State private var modelToDelete: WhisperModel?
+    @State private var operationError: String?
+
+    private var selectedModel: WhisperModel? {
+        modelManager.model(forName: settingsStore.selectedModel)
+    }
     
     var body: some View {
-        Form {
-            Section {
-                ForEach(modelManager.availableModels) { model in
-                    ModelRowView(
-                        model: model,
-                        isSelected: settingsStore.selectedModel == model.name,
-                        isDownloaded: modelManager.isModelDownloaded(model),
-                        isDownloading: modelManager.currentDownloadingModel == model.name,
-                        downloadProgress: modelManager.currentDownloadingModel == model.name ? modelManager.downloadProgress : nil,
-                        isModelLoaded: speechRecognizer.currentModelName == model.name && speechRecognizer.isModelLoaded,
-                        onSelect: {
-                            settingsStore.selectedModel = model.name
-                            modelManager.selectModel(model)
-                        },
-                        onDownload: {
-                            Task {
-                                try? await modelManager.downloadModel(model)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("Speech models")
+                        .font(.title2.weight(.semibold))
+                    Text("Choose a model to use for dictation on this Mac.")
+                        .foregroundColor(.secondary)
+                }
+
+                selectedModelCard
+
+                if let error = operationError ?? speechRecognizer.error?.localizedDescription {
+                    Label(error, systemImage: "exclamationmark.triangle.fill")
+                        .foregroundColor(.red)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(12)
+                        .background(Color.red.opacity(0.1), in: RoundedRectangle(cornerRadius: 10))
+                }
+
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        Text("Available models")
+                            .font(.headline)
+                        Spacer()
+                        if modelManager.isRefreshingCatalog {
+                            ProgressView().controlSize(.small)
+                        } else {
+                            Button("Refresh") {
+                                Task { await modelManager.refreshCatalog() }
                             }
-                        },
-                        onDelete: {
-                            modelToDelete = model
-                            showDeleteConfirmation = true
-                        },
-                        onLoad: {
-                            Task {
-                                try? await speechRecognizer.loadModel(name: model.name)
-                            }
+                            .buttonStyle(.borderless)
                         }
-                    )
+                    }
+                    Text("Catalog models are available for this Mac. Downloaded models stay listed offline. English models work best for English; multilingual models support other languages.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    if let catalogError = modelManager.catalogError {
+                        Text(catalogError)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    if modelManager.availableModels.isEmpty && !modelManager.isRefreshingCatalog {
+                        Text("No models available yet. Refresh to load the catalog.")
+                            .foregroundColor(.secondary)
+                    }
+
+                    LazyVStack(spacing: 0) {
+                        ForEach(modelManager.availableModels) { model in
+                            if model.id != modelManager.availableModels.first?.id {
+                                Divider().padding(.leading, 16)
+                            }
+                            ModelRowView(
+                                model: model,
+                                isSelected: settingsStore.selectedModel == model.name,
+                                isDownloaded: modelManager.isModelDownloaded(model),
+                                isDownloading: modelManager.currentDownloadingModel == model.name,
+                                downloadProgress: modelManager.currentDownloadingModel == model.name ? modelManager.downloadProgress : nil,
+                                isBusy: modelManager.isDownloading || speechRecognizer.isLoading,
+                                isLoading: speechRecognizer.isLoading && settingsStore.selectedModel == model.name,
+                                isModelLoaded: speechRecognizer.currentModelName == model.name && speechRecognizer.isModelLoaded,
+                                onUse: { activate(model) },
+                                onDownload: { downloadAndActivate(model) },
+                                onDelete: {
+                                    modelToDelete = model
+                                    showDeleteConfirmation = true
+                                }
+                            )
+                        }
+                    }
+                    .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 12))
                 }
-            } header: {
-                Text("Available Models")
             }
-            
-            Section {
-                if speechRecognizer.isLoading {
-                    HStack {
-                        ProgressView()
-                            .scaleEffect(0.8)
-                        Text("Loading model...")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                } else if speechRecognizer.isModelLoaded {
-                    HStack {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
-                        Text("Model '\(speechRecognizer.currentModelName ?? "Unknown")' is loaded and ready")
-                            .font(.caption)
-                    }
-                } else {
-                    HStack {
-                        Image(systemName: "info.circle")
-                            .foregroundColor(.secondary)
-                        Text("No model loaded. Select and load a model to start transcribing.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-            } header: {
-                Text("Status")
-            }
-            
-            Section {
-                Text("Models are downloaded on first use. Larger models provide better accuracy but require more memory and processing time.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                Text("English-only models (.en) are faster and more accurate for English speech. Multilingual models support multiple languages.")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            } header: {
-                Text("Info")
-            }
+            .frame(maxWidth: 760, alignment: .leading)
+            .frame(maxWidth: .infinity)
+            .padding(24)
         }
-        .formStyle(.grouped)
-        .padding()
         .alert("Delete Model", isPresented: $showDeleteConfirmation) {
             Button("Cancel", role: .cancel) {
                 modelToDelete = nil
             }
             Button("Delete", role: .destructive) {
                 if let model = modelToDelete {
-                    try? modelManager.deleteModel(model)
+                    do {
+                        if settingsStore.selectedModel == model.name {
+                            speechRecognizer.unloadModel()
+                            AppDependencies.shared.appState.isModelLoaded = false
+                        }
+                        try modelManager.deleteModel(model)
+                        operationError = nil
+                    } catch {
+                        operationError = error.localizedDescription
+                    }
                 }
                 modelToDelete = nil
             }
@@ -504,8 +517,71 @@ struct ModelSettingsView: View {
                 Text("Are you sure you want to delete '\(model.displayName)'? You can download it again later.")
             }
         }
-        .onAppear {
+        .task {
             modelManager.refreshDownloadedModels()
+            await modelManager.refreshCatalog()
+        }
+    }
+
+    private var selectedModelCard: some View {
+        HStack(spacing: 12) {
+            Image(systemName: isSelectedModelLoaded ? "checkmark.circle.fill" : "waveform")
+                .font(.title2)
+                .foregroundColor(isSelectedModelLoaded ? .green : .accentColor)
+                .frame(width: 32)
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Current model")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                Text(selectedModel?.displayName ?? "None selected")
+                    .font(.headline)
+                Text(currentStatus)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            Spacer()
+            if speechRecognizer.isLoading {
+                ProgressView()
+                    .controlSize(.small)
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.accentColor.opacity(0.09), in: RoundedRectangle(cornerRadius: 12))
+    }
+
+    private var currentStatus: String {
+        if speechRecognizer.isLoading { return "Loading model…" }
+        if isSelectedModelLoaded { return "Ready for dictation" }
+        guard let selectedModel else { return "Choose a model below" }
+        return modelManager.isModelDownloaded(selectedModel)
+            ? "Downloaded. Select Load model below to use it."
+            : "Download this model below to get started."
+    }
+
+    private var isSelectedModelLoaded: Bool {
+        speechRecognizer.isModelLoaded &&
+            speechRecognizer.currentModelName == settingsStore.selectedModel
+    }
+
+    private func activate(_ model: WhisperModel) {
+        operationError = nil
+        settingsStore.selectedModel = model.name
+        modelManager.selectModel(model)
+        Task {
+            await AppDependencies.shared.loadSelectedModel()
+        }
+    }
+
+    private func downloadAndActivate(_ model: WhisperModel) {
+        operationError = nil
+        Task {
+            do {
+                try await modelManager.downloadModel(model)
+                activate(model)
+            } catch {
+                operationError = error.localizedDescription
+            }
         }
     }
 }
@@ -516,97 +592,67 @@ struct ModelRowView: View {
     let isDownloaded: Bool
     let isDownloading: Bool
     let downloadProgress: Double?
+    let isBusy: Bool
+    let isLoading: Bool
     let isModelLoaded: Bool
-    let onSelect: () -> Void
+    let onUse: () -> Void
     let onDownload: () -> Void
     let onDelete: () -> Void
-    let onLoad: () -> Void
     
     var body: some View {
-        HStack {
+        HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text(model.displayName)
-                        .fontWeight(isSelected ? .semibold : .regular)
-                    
-                    if isModelLoaded {
-                        Image(systemName: "bolt.fill")
-                            .foregroundColor(.green)
-                            .font(.caption)
-                    }
+                        .fontWeight(isSelected ? .semibold : .medium)
+                    if isSelected { Text("Selected").font(.caption2).foregroundColor(.accentColor) }
                 }
-                
-                HStack(spacing: 8) {
-                    Text(model.sizeDescription)
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    if isDownloaded {
-                        Label("Downloaded", systemImage: "checkmark.circle.fill")
-                            .font(.caption)
-                            .foregroundColor(.green)
-                    }
-                }
+                Text("\(model.id)  ·  \(isDownloaded ? "Downloaded" : "Not downloaded")")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
             
-            Spacer()
+            Spacer(minLength: 8)
             
-            if isDownloading, let progress = downloadProgress {
-                VStack(alignment: .trailing, spacing: 2) {
-                    ProgressView(value: progress)
-                        .frame(width: 80)
-                    Text("\(Int(progress * 100))%")
-                        .font(.caption2)
+            if isDownloading {
+                VStack(alignment: .trailing, spacing: 3) {
+                    ProgressView(value: downloadProgress ?? 0)
+                        .frame(width: 110)
+                    Text("Downloading \(Int((downloadProgress ?? 0) * 100))%")
+                        .font(.caption)
                         .foregroundColor(.secondary)
                 }
             } else if isDownloaded {
-                HStack(spacing: 8) {
-                    if !isModelLoaded {
-                        Button("Load") {
-                            onLoad()
-                        }
-                        .buttonStyle(.bordered)
+                if isLoading {
+                    ProgressView()
                         .controlSize(.small)
-                    }
-                    
-                    Button(role: .destructive) {
-                        onDelete()
-                    } label: {
-                        Image(systemName: "trash")
-                    }
-                    .buttonStyle(.borderless)
-                    
-                    radioButton
+                    Text("Loading…").font(.caption).foregroundColor(.secondary)
+                } else if isModelLoaded {
+                    Label("Ready", systemImage: "checkmark.circle.fill")
+                        .font(.caption)
+                        .foregroundColor(.green)
+                } else {
+                    Button(isSelected ? "Load model" : "Use model", action: onUse)
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+                        .disabled(isBusy)
                 }
+                Button(action: onDelete) {
+                    Image(systemName: "trash")
+                }
+                .buttonStyle(.borderless)
+                .help("Delete \(model.displayName)")
+                .accessibilityLabel("Delete \(model.displayName)")
+                .disabled(isBusy)
             } else {
-                HStack(spacing: 8) {
-                    Button("Download") {
-                        onDownload()
-                    }
+                Button("Download & use", action: onDownload)
                     .buttonStyle(.bordered)
                     .controlSize(.small)
-                    
-                    radioButton
-                }
+                    .disabled(isBusy)
             }
         }
-        .padding(.vertical, 4)
-        .contentShape(Rectangle())
-        .onTapGesture {
-            if isDownloaded {
-                onSelect()
-            }
-        }
-    }
-    
-    private var radioButton: some View {
-        Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-            .foregroundColor(isSelected ? .accentColor : .secondary)
-            .onTapGesture {
-                if isDownloaded {
-                    onSelect()
-                }
-            }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
     }
 }
 

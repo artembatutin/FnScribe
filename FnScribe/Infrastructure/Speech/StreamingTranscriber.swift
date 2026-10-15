@@ -11,6 +11,7 @@ import Combine
 import WhisperKit
 
 /// Delegate protocol for receiving streaming audio samples
+@MainActor
 protocol AudioStreamDelegate: AnyObject {
     func audioEngine(_ engine: Any, didCaptureSamples samples: [Float])
 }
@@ -32,14 +33,14 @@ class StreamingTranscriber: ObservableObject {
     
     private var whisperKit: WhisperKit?
     private var audioBuffer: [Float] = []
-    private var processingTask: Task<Void, Never>?
     private var chunkProcessingTask: Task<Void, Never>?
     
     private let chunkDuration: TimeInterval = 1.0
-    private let sampleRate: Double = 16000.0
     private var lastProcessedIndex: Int = 0
     private var isProcessingChunk: Bool = false
     private var streamingStartTime: Date?
+    private var sessionID = UUID()
+    private var isFinalizing = false
     
     private let minAudioLengthForProcessing: Int = 8000
     private let overlapSamples: Int = 3200
@@ -61,7 +62,8 @@ class StreamingTranscriber: ObservableObject {
             throw SpeechRecognizerError.modelNotLoaded
         }
         
-        guard !isStreaming else { return }
+        guard !isStreaming, !isFinalizing else { return }
+        sessionID = UUID()
         
         audioBuffer.removeAll()
         lastProcessedIndex = 0
@@ -77,17 +79,26 @@ class StreamingTranscriber: ObservableObject {
     }
     
     /// Stop streaming and return the final transcription
-    func stopStreaming() async -> String {
-        guard isStreaming else { return streamingState.displayText }
+    func stopStreaming(shouldProcessFinalChunk: Bool = true) async -> String {
+        guard isStreaming || chunkProcessingTask != nil else { return streamingState.displayText }
         
+        guard !isFinalizing else { return streamingState.displayText }
+        isFinalizing = true
+        defer { isFinalizing = false }
+        let stoppingSession = sessionID
         isStreaming = false
-        chunkProcessingTask?.cancel()
+        let activeChunkTask = chunkProcessingTask
+        activeChunkTask?.cancel()
         chunkProcessingTask = nil
+
+        await activeChunkTask?.value
+        guard sessionID == stoppingSession else { return "" }
         
-        if !audioBuffer.isEmpty && audioBuffer.count > minAudioLengthForProcessing {
+        if shouldProcessFinalChunk && !audioBuffer.isEmpty && audioBuffer.count >= minAudioLengthForProcessing {
             await processFinalChunk()
         }
         
+        guard sessionID == stoppingSession else { return "" }
         let finalText = streamingState.finalize()
         
         audioBuffer.removeAll()
@@ -101,11 +112,10 @@ class StreamingTranscriber: ObservableObject {
     
     /// Cancel streaming without finalizing
     func cancelStreaming() {
+        sessionID = UUID()
         isStreaming = false
         chunkProcessingTask?.cancel()
         chunkProcessingTask = nil
-        processingTask?.cancel()
-        processingTask = nil
         
         audioBuffer.removeAll()
         lastProcessedIndex = 0
@@ -133,7 +143,7 @@ class StreamingTranscriber: ObservableObject {
             while let self = self, self.isStreaming {
                 try? await Task.sleep(nanoseconds: UInt64(self.chunkDuration * 1_000_000_000))
                 
-                guard self.isStreaming else { break }
+                guard !Task.isCancelled, self.isStreaming else { break }
                 
                 await self.processChunk()
             }
@@ -141,13 +151,15 @@ class StreamingTranscriber: ObservableObject {
     }
     
     private func processChunk() async {
+        guard !Task.isCancelled else { return }
         guard !isProcessingChunk else { return }
-        guard audioBuffer.count > minAudioLengthForProcessing else { return }
+        guard audioBuffer.count - lastProcessedIndex >= minAudioLengthForProcessing else { return }
         guard let whisperKit = whisperKit else { return }
         
         isProcessingChunk = true
         defer { isProcessingChunk = false }
         
+        let processingSession = sessionID
         let startIndex = max(0, lastProcessedIndex - overlapSamples)
         let endIndex = audioBuffer.count
         
@@ -160,6 +172,8 @@ class StreamingTranscriber: ObservableObject {
                 verbose: false,
                 task: .transcribe,
                 language: "en",
+                temperatureFallbackCount: 0,
+                sampleLength: 128,
                 withoutTimestamps: true,
                 wordTimestamps: false,
                 suppressBlank: true
@@ -169,14 +183,14 @@ class StreamingTranscriber: ObservableObject {
                 audioArray: chunkAudio,
                 decodeOptions: decodingOptions
             )
+
+            guard !Task.isCancelled, sessionID == processingSession, isStreaming else { return }
             
             let newText = TranscriptionSanitizer.sanitize(
                 results.map { $0.text }.joined(separator: " ")
             )
             
-            await MainActor.run {
-                self.updateStreamingText(newText)
-            }
+            updateStreamingText(newText)
             
             lastProcessedIndex = endIndex
             
@@ -187,8 +201,9 @@ class StreamingTranscriber: ObservableObject {
     
     private func processFinalChunk() async {
         guard let whisperKit = whisperKit else { return }
-        guard audioBuffer.count > minAudioLengthForProcessing else { return }
+        guard audioBuffer.count >= minAudioLengthForProcessing else { return }
         
+        let finalizingSession = sessionID
         do {
             let decodingOptions = DecodingOptions(
                 verbose: false,
@@ -204,6 +219,7 @@ class StreamingTranscriber: ObservableObject {
                 decodeOptions: decodingOptions
             )
             
+            guard sessionID == finalizingSession else { return }
             let finalText = TranscriptionSanitizer.sanitize(
                 results.map { $0.text }.joined(separator: " ")
             )
@@ -215,6 +231,7 @@ class StreamingTranscriber: ObservableObject {
             streamingText = finalText
             
         } catch {
+            guard sessionID == finalizingSession else { return }
             streamingState.confirm(pendingText)
             confirmedText = streamingState.confirmedText
             pendingText = ""
@@ -224,7 +241,7 @@ class StreamingTranscriber: ObservableObject {
     private func updateStreamingText(_ newText: String) {
         guard !newText.isEmpty else { return }
         
-        let (confirmed, pending) = mergeTranscription(newText, with: confirmedText)
+        let (confirmed, pending) = StreamingTranscript.merge(newText, after: streamingText)
         
         confirmedText = confirmed
         pendingText = pending
@@ -247,71 +264,4 @@ class StreamingTranscriber: ObservableObject {
         }
     }
     
-    private func mergeTranscription(_ new: String, with existing: String) -> (confirmed: String, pending: String) {
-        guard !existing.isEmpty else {
-            return ("", new)
-        }
-        
-        let existingWords = existing.split(separator: " ").map(String.init)
-        let newWords = new.split(separator: " ").map(String.init)
-        
-        guard !newWords.isEmpty else {
-            return (existing, "")
-        }
-        
-        var overlapStart = -1
-        let searchWindow = min(5, existingWords.count)
-        
-        for i in max(0, existingWords.count - searchWindow)..<existingWords.count {
-            let existingWord = existingWords[i].lowercased()
-            if let firstNewWord = newWords.first?.lowercased(),
-               existingWord == firstNewWord || levenshteinDistance(existingWord, firstNewWord) <= 2 {
-                overlapStart = i
-                break
-            }
-        }
-        
-        if overlapStart >= 0 {
-            let confirmedPart = existingWords[0..<overlapStart].joined(separator: " ")
-            let pendingPart = newWords.joined(separator: " ")
-            return (confirmedPart.isEmpty ? "" : confirmedPart + " ", pendingPart)
-        }
-        
-        let confirmedPart = existing
-        let pendingPart = newWords.suffix(max(1, newWords.count - existingWords.count)).joined(separator: " ")
-        
-        if pendingPart.isEmpty {
-            return (confirmedPart, "")
-        }
-        
-        return (confirmedPart, pendingPart)
-    }
-    
-    private func levenshteinDistance(_ s1: String, _ s2: String) -> Int {
-        let s1Array = Array(s1)
-        let s2Array = Array(s2)
-        let m = s1Array.count
-        let n = s2Array.count
-        
-        if m == 0 { return n }
-        if n == 0 { return m }
-        
-        var matrix = [[Int]](repeating: [Int](repeating: 0, count: n + 1), count: m + 1)
-        
-        for i in 0...m { matrix[i][0] = i }
-        for j in 0...n { matrix[0][j] = j }
-        
-        for i in 1...m {
-            for j in 1...n {
-                let cost = s1Array[i - 1] == s2Array[j - 1] ? 0 : 1
-                matrix[i][j] = min(
-                    matrix[i - 1][j] + 1,
-                    matrix[i][j - 1] + 1,
-                    matrix[i - 1][j - 1] + cost
-                )
-            }
-        }
-        
-        return matrix[m][n]
-    }
 }

@@ -46,4 +46,37 @@ enum AppSupportPaths {
 
         return directory
     }
+
+    nonisolated static func completeModelPath(
+        id: String,
+        name: String,
+        in storageDirectory: URL,
+        fileManager: FileManager = .default
+    ) -> URL? {
+        let hubPath = storageDirectory
+            .appendingPathComponent("models/argmaxinc/whisperkit-coreml", isDirectory: true)
+            .appendingPathComponent(id, isDirectory: true)
+        let legacyPaths = [id, name].map {
+            storageDirectory.appendingPathComponent($0, isDirectory: true)
+        }
+        return ([hubPath] + legacyPaths).first {
+            isCompleteModel(at: $0, fileManager: fileManager)
+        }
+    }
+
+    nonisolated static func isCompleteModel(
+        at folder: URL,
+        fileManager: FileManager = .default
+    ) -> Bool {
+        ["MelSpectrogram", "AudioEncoder", "TextDecoder"].allSatisfy { name in
+            let compiledPath = folder.appendingPathComponent("\(name).mlmodelc").path
+            let packageModelPath = folder
+                .appendingPathComponent("\(name).mlpackage/Data/com.apple.CoreML/model.mlmodel")
+                .path
+            var isDirectory: ObjCBool = false
+            return (fileManager.fileExists(atPath: compiledPath, isDirectory: &isDirectory) &&
+                    isDirectory.boolValue) ||
+                fileManager.fileExists(atPath: packageModelPath)
+        }
+    }
 }

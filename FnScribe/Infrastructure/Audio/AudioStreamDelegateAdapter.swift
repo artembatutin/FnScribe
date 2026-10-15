@@ -9,6 +9,7 @@ import Foundation
 
 /// Adapter that bridges AudioEngine with StreamingTranscriber
 /// Forwards audio samples from the audio engine to the streaming transcriber
+@MainActor
 class AudioStreamDelegateAdapter: AudioStreamDelegate {
     
     private weak var transcriber: StreamingTranscriber?
@@ -18,8 +19,6 @@ class AudioStreamDelegateAdapter: AudioStreamDelegate {
     }
     
     func audioEngine(_ engine: Any, didCaptureSamples samples: [Float]) {
-        Task { @MainActor in
-            transcriber?.appendAudio(samples)
-        }
+        transcriber?.appendAudio(samples)
     }
 }

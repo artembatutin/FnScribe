@@ -82,6 +82,9 @@ class AudioEngine: ObservableObject {
     private var audioEngine: AVAudioEngine?
     private var inputNode: AVAudioInputNode?
     private var audioBuffers: [AVAudioPCMBuffer] = []
+    private var captureQueue: AudioCaptureQueue?
+    private var drainCapturedAudio: (() -> Void)?
+    private var restartTask: Task<Void, Never>?
     private var configuration: AudioEngineConfiguration
     
     private var recordingStartTime: Date?
@@ -169,7 +172,10 @@ class AudioEngine: ObservableObject {
         // Create format converter if needed
         let converter: AVAudioConverter?
         if nativeFormat.sampleRate != configuration.sampleRate || nativeFormat.channelCount != configuration.channelCount {
-            converter = AVAudioConverter(from: nativeFormat, to: targetFormat)
+            guard let formatConverter = AVAudioConverter(from: nativeFormat, to: targetFormat) else {
+                throw AudioEngineError.formatConversionFailed
+            }
+            converter = formatConverter
         } else {
             converter = nil
         }
@@ -178,15 +184,9 @@ class AudioEngine: ObservableObject {
         audioBuffers.removeAll()
         error = nil
         
-        // Install tap on input node
-        let bufferSize: AVAudioFrameCount = 4096
-        
-        inputNode.installTap(onBus: 0, bufferSize: bufferSize, format: nativeFormat) { [weak self] buffer, time in
-            Task { @MainActor [weak self] in
-                self?.processAudioBuffer(buffer, converter: converter, targetFormat: targetFormat)
-            }
-        }
-        
+        installCaptureTap(on: inputNode, nativeFormat: nativeFormat,
+                          converter: converter, targetFormat: targetFormat)
+
         // Prepare and start engine
         engine.prepare()
         
@@ -220,6 +220,12 @@ class AudioEngine: ObservableObject {
         inputNode?.removeTap(onBus: 0)
         audioEngine?.stop()
         
+        // Include buffers captured before stop, even if their UI task has not run.
+        finishCaptureTap()
+        restartTask?.cancel()
+        restartTask = nil
+        isRestartingEngine = false
+
         // Update state
         isRecording = false
         audioLevel = 0.0
@@ -242,39 +248,39 @@ class AudioEngine: ObservableObject {
     
     // MARK: - Private Methods
     
+    private func installCaptureTap(on node: AVAudioInputNode, nativeFormat: AVAudioFormat,
+                                   converter: AVAudioConverter?, targetFormat: AVAudioFormat) {
+        let queue = AudioCaptureQueue()
+        captureQueue = queue
+        drainCapturedAudio = { [weak self] in
+            guard let self else { return }
+            for buffer in queue.drain() {
+                self.processAudioBuffer(buffer, converter: converter, targetFormat: targetFormat)
+            }
+        }
+        node.installTap(onBus: 0, bufferSize: 1024, format: nativeFormat) { [weak self] buffer, _ in
+            // The tap owns `buffer` only for this callback. Copy before hopping actors.
+            guard queue.appendCopy(of: buffer) else { return }
+            Task { @MainActor [weak self] in
+                guard let self, self.captureQueue === queue else { return }
+                self.drainCapturedAudio?()
+            }
+        }
+    }
+
+    private func finishCaptureTap() {
+        captureQueue?.close()
+        drainCapturedAudio?()
+        drainCapturedAudio = nil
+        captureQueue = nil
+    }
+
     private func processAudioBuffer(_ buffer: AVAudioPCMBuffer, converter: AVAudioConverter?, targetFormat: AVAudioFormat) {
         guard isRecording else { return }
         
-        let processedBuffer: AVAudioPCMBuffer
-        
-        if let converter = converter {
-            // Convert to target format
-            let frameCapacity = AVAudioFrameCount(
-                Double(buffer.frameLength) * (configuration.sampleRate / buffer.format.sampleRate)
-            )
-            
-            guard let convertedBuffer = AVAudioPCMBuffer(
-                pcmFormat: targetFormat,
-                frameCapacity: frameCapacity
-            ) else {
-                return
-            }
-            
-            var error: NSError?
-            let status = converter.convert(to: convertedBuffer, error: &error) { inNumPackets, outStatus in
-                outStatus.pointee = .haveData
-                return buffer
-            }
-            
-            guard status != .error, error == nil else {
-                return
-            }
-            
-            processedBuffer = convertedBuffer
-        } else {
-            processedBuffer = buffer
-        }
-        
+        guard let processedBuffer = AudioBufferConverter.convert(buffer, using: converter, to: targetFormat),
+              processedBuffer.frameLength > 0 else { return }
+
         // Store buffer
         audioBuffers.append(processedBuffer)
         
@@ -328,7 +334,7 @@ class AudioEngine: ObservableObject {
     }
     
     private func startDurationTimer() {
-        durationTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+        durationTimer = Timer(timeInterval: 0.1, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in
                 guard let self = self, let startTime = self.recordingStartTime else { return }
                 
@@ -341,6 +347,7 @@ class AudioEngine: ObservableObject {
                 }
             }
         }
+        if let durationTimer { RunLoop.main.add(durationTimer, forMode: .common) }
     }
     
     private func stopDurationTimer() {
@@ -382,13 +389,16 @@ class AudioEngine: ObservableObject {
     private func cleanup() {
         stopDurationTimer()
         levelUpdateTask?.cancel()
+        restartTask?.cancel()
+        restartTask = nil
+        captureQueue?.close()
+        captureQueue = nil
+        drainCapturedAudio = nil
         removeCoreAudioDeviceListener()
         removeNotifications()
         
-        if isRecording {
-            inputNode?.removeTap(onBus: 0)
-            audioEngine?.stop()
-        }
+        inputNode?.removeTap(onBus: 0)
+        audioEngine?.stop()
         
         audioBuffers.removeAll()
         audioEngine = nil
@@ -406,9 +416,11 @@ class AudioEngine: ObservableObject {
             forName: .AVAudioEngineConfigurationChange,
             object: nil,
             queue: .main
-        ) { [weak self] _ in
+        ) { [weak self] notification in
+            let changedEngine = notification.object as? AVAudioEngine
             Task { @MainActor [weak self] in
-                self?.handleConfigurationChange()
+                guard let self, changedEngine === self.audioEngine else { return }
+                self.handleConfigurationChange()
             }
         }
         
@@ -441,13 +453,12 @@ class AudioEngine: ObservableObject {
         audioEngine = nil
         inputNode = nil
         
+        finishCaptureTap()
+
         // Brief delay to let the system settle on the new audio device
-        Task { @MainActor [weak self] in
+        restartTask = Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: 500_000_000) // 500ms
-            guard let self = self, self.isRecording else {
-                self?.isRestartingEngine = false
-                return
-            }
+            guard !Task.isCancelled, let self, self.isRecording else { return }
             
             do {
                 let engine = AVAudioEngine()
@@ -473,32 +484,26 @@ class AudioEngine: ObservableObject {
                 
                 let converter: AVAudioConverter?
                 if nativeFormat.sampleRate != self.configuration.sampleRate || nativeFormat.channelCount != self.configuration.channelCount {
-                    converter = AVAudioConverter(from: nativeFormat, to: targetFormat)
+                    guard let formatConverter = AVAudioConverter(from: nativeFormat, to: targetFormat) else {
+                        throw AudioEngineError.formatConversionFailed
+                    }
+                    converter = formatConverter
                 } else {
                     converter = nil
                 }
                 
-                let bufferSize: AVAudioFrameCount = 4096
-                
-                newInputNode.installTap(onBus: 0, bufferSize: bufferSize, format: nativeFormat) { [weak self] buffer, time in
-                    Task { @MainActor [weak self] in
-                        self?.processAudioBuffer(buffer, converter: converter, targetFormat: targetFormat)
-                    }
-                }
-                
+                self.installCaptureTap(on: newInputNode, nativeFormat: nativeFormat,
+                                       converter: converter, targetFormat: targetFormat)
+
                 engine.prepare()
                 try engine.start()
                 
                 self.isRestartingEngine = false
                 
             } catch {
-                // Failed to restart with new device, stop recording
-                self.isRecording = false
-                self.audioLevel = 0.0
-                self.stopDurationTimer()
-                self.audioBuffers.removeAll()
-                self.audioEngine = nil
-                self.inputNode = nil
+                // Keep captured audio and recording state until the normal stop path
+                // drains it and transcribes what was said before the device disappeared.
+                self.error = .engineStartFailed(error)
                 self.isRestartingEngine = false
                 self.onAutoStop?()
             }

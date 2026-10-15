@@ -67,20 +67,11 @@ struct FnScribeApp: App {
     }
     
     private var menuBarLabel: some View {
-        Image(systemName: menuBarIconName)
-            .symbolRenderingMode(.hierarchical)
-    }
-    
-    private var menuBarIconName: String {
-        switch appState.recordingState {
-        case .idle:
-            return "mic.circle"
-        case .listening:
-            return "mic.circle.fill"
-        case .processing:
-            return "ellipsis.circle"
-        case .error:
-            return "exclamationmark.circle"
-        }
+        Image(systemName: appState.recordingState.menuBarSymbolName)
+            .symbolRenderingMode(.monochrome)
+            .font(.system(size: 16, weight: .medium))
+            .frame(width: 20, height: 18)
+            .accessibilityLabel("\(AppBranding.displayName): \(appState.recordingState.menuStatusTitle)")
+            .help("\(AppBranding.displayName) — \(appState.recordingState.menuStatusTitle)")
     }
 }

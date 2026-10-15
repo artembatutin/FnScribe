@@ -25,6 +25,7 @@ class TextInjectionService: ObservableObject {
     private let permissionsManager: PermissionsManager
     private let adapterRegistry: AdapterRegistry
     private let inputFieldDetector: InputFieldDetector?
+    private var waitingInjections: [CheckedContinuation<Void, Never>] = []
     
     // MARK: - Initialization
     
@@ -46,18 +47,15 @@ class TextInjectionService: ObservableObject {
     /// - Returns: The result of the injection
     @discardableResult
     func inject(text: String) async throws -> InjectionResult {
+        await beginInjection()
+        defer { endInjection() }
+        try Task.checkCancellation()
+
         // Check permissions first
         try verifyPermissions()
         
         // Apply current settings
         applySettings()
-        
-        isInjecting = true
-        lastError = nil
-        
-        defer {
-            isInjecting = false
-        }
         
         do {
             // Get the appropriate adapter for the current app
@@ -94,18 +92,15 @@ class TextInjectionService: ObservableObject {
     /// - Returns: The result of the injection
     @discardableResult
     func inject(text: String, mode: InjectionMode) async throws -> InjectionResult {
+        await beginInjection()
+        defer { endInjection() }
+        try Task.checkCancellation()
+
         // Check permissions first
         try verifyPermissions()
         
         // Apply current settings (except mode)
         applySettings()
-        
-        isInjecting = true
-        lastError = nil
-        
-        defer {
-            isInjecting = false
-        }
         
         do {
             let result = try await textInjector.inject(text: text, mode: mode)
@@ -173,6 +168,24 @@ class TextInjectionService: ObservableObject {
     }
     
     // MARK: - Permission Handling
+
+    private func beginInjection() async {
+        if isInjecting {
+            await withCheckedContinuation { continuation in
+                waitingInjections.append(continuation)
+            }
+        }
+        isInjecting = true
+        lastError = nil
+    }
+
+    private func endInjection() {
+        if waitingInjections.isEmpty {
+            isInjecting = false
+        } else {
+            waitingInjections.removeFirst().resume()
+        }
+    }
     
     /// Verifies that required permissions are granted
     private func verifyPermissions() throws {
