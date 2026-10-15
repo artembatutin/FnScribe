@@ -293,9 +293,9 @@ class AppDependencies {
     private func startStreamingTranscription(for recordingID: UUID) async {
         guard activeRecordingID == recordingID, audioEngine.isRecording else { return }
 
-        // Ensure WhisperKit is available for streaming
-        if let whisperKit = speechRecognizer.whisperKit {
-            streamingTranscriber.setWhisperKit(whisperKit)
+        // Use the selected model for the live preview as well as final dictation.
+        if let backend = speechRecognizer.backend {
+            streamingTranscriber.setBackend(backend)
             do {
                 try await streamingTranscriber.startStreaming()
                 if activeRecordingID != recordingID || !audioEngine.isRecording {

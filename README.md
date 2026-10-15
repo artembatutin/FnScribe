@@ -29,8 +29,8 @@ FnScribe is an AI-powered macOS dictation app that turns speech into polished, c
 ## 🚀 Quick Start
 
 ### Prerequisites
-- macOS 12.0 or later
-- Xcode 14.0 or later (for development)
+- macOS 14.0 or later
+- Xcode 26 or later (for development)
 - Microphone access permissions
 
 ### Installation
@@ -51,6 +51,42 @@ FnScribe is an AI-powered macOS dictation app that turns speech into polished, c
 
 #### From Release
 Download the latest signed DMG file from the [Releases](https://github.com/artembatutin/FnScribe/releases) section.
+
+## Local speech models
+
+Open **Settings → Models** and choose **Download & use** for a model. The initial
+model download needs an internet connection; recognition then runs locally.
+The first Parakeet load can take a few minutes while macOS prepares the model for
+the Neural Engine.
+
+On Apple Silicon, FnScribe supports:
+
+| Model | Approximate download | Languages |
+| --- | --- | --- |
+| Parakeet Ultra (recommended) | 630 MB | 25, automatically detected |
+| Parakeet TDT 0.6B V3 | 485 MB | 25, automatically detected |
+
+Ultra is a post-trained v3 variant; FluidAudio reports higher accuracy at similar
+speed in its [published benchmarks](https://github.com/FluidInference/FluidAudio/blob/v0.17.7/Documentation/ASR/ParakeetUltra.md).
+The [NVIDIA v3 model card](https://huggingface.co/nvidia/parakeet-tdt-0.6b-v3)
+lists the supported languages. Both models support FnScribe's live preview and
+final dictation. Live preview uses repeated audio windows; these are not the
+separate English-only Parakeet EOU streaming models.
+
+Existing Whisper models and saved selections continue to work. Whisper remains
+available on Intel Macs and for languages outside Parakeet's coverage. Parakeet
+variants are stored separately under `~/Library/Application Support/FnScribe/Models/parakeet`.
+
+Parakeet V3 is by NVIDIA; Ultra is by Moondream, with Core ML conversions by
+FluidInference. The downloaded models use the [CC BY 4.0 license](https://creativecommons.org/licenses/by/4.0/).
+
+The integration pins [FluidAudio 0.17.7](https://github.com/FluidInference/FluidAudio/releases/tag/v0.17.7).
+The regular unit suite uses offline fixtures. To run the optional hardware integration
+check, set `FNSCRIBE_TEST_AUDIO` to a local speech audio file and
+`FNSCRIBE_TEST_MODEL_CACHE` to a writable model cache directory in the test runner's
+environment, then run `ParakeetSupportTests/testParakeetModelsEndToEnd`.
+It downloads missing models and verifies final transcription and live preview
+with network access disabled in the model runtime.
 
 ## 📖 Documentation
 

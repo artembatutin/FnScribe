@@ -8,7 +8,6 @@
 import Foundation
 import AVFoundation
 import Combine
-import WhisperKit
 
 /// Delegate protocol for receiving streaming audio samples
 @MainActor
@@ -16,7 +15,7 @@ protocol AudioStreamDelegate: AnyObject {
     func audioEngine(_ engine: Any, didCaptureSamples samples: [Float])
 }
 
-/// Handles real-time streaming transcription using WhisperKit
+/// Handles real-time streaming transcription using the selected speech model
 @MainActor
 class StreamingTranscriber: ObservableObject {
     
@@ -31,7 +30,7 @@ class StreamingTranscriber: ObservableObject {
     
     // MARK: - Private Properties
     
-    private var whisperKit: WhisperKit?
+    private var backend: (any SpeechTranscribing)?
     private var audioBuffer: [Float] = []
     private var chunkProcessingTask: Task<Void, Never>?
     
@@ -51,14 +50,14 @@ class StreamingTranscriber: ObservableObject {
     
     // MARK: - Public Methods
     
-    /// Set the WhisperKit instance to use for transcription
-    func setWhisperKit(_ whisperKit: WhisperKit?) {
-        self.whisperKit = whisperKit
+    /// Set the loaded backend to use for transcription.
+    func setBackend(_ backend: (any SpeechTranscribing)?) {
+        self.backend = backend
     }
     
     /// Start streaming transcription
     func startStreaming() async throws {
-        guard whisperKit != nil else {
+        guard backend != nil else {
             throw SpeechRecognizerError.modelNotLoaded
         }
         
@@ -101,6 +100,7 @@ class StreamingTranscriber: ObservableObject {
         guard sessionID == stoppingSession else { return "" }
         let finalText = streamingState.finalize()
         
+        backend = nil
         audioBuffer.removeAll()
         lastProcessedIndex = 0
         confirmedText = ""
@@ -116,6 +116,7 @@ class StreamingTranscriber: ObservableObject {
         isStreaming = false
         chunkProcessingTask?.cancel()
         chunkProcessingTask = nil
+        backend = nil
         
         audioBuffer.removeAll()
         lastProcessedIndex = 0
@@ -154,7 +155,7 @@ class StreamingTranscriber: ObservableObject {
         guard !Task.isCancelled else { return }
         guard !isProcessingChunk else { return }
         guard audioBuffer.count - lastProcessedIndex >= minAudioLengthForProcessing else { return }
-        guard let whisperKit = whisperKit else { return }
+        guard let backend else { return }
         
         isProcessingChunk = true
         defer { isProcessingChunk = false }
@@ -168,26 +169,14 @@ class StreamingTranscriber: ObservableObject {
         let chunkAudio = Array(audioBuffer[startIndex..<endIndex])
         
         do {
-            let decodingOptions = DecodingOptions(
-                verbose: false,
-                task: .transcribe,
-                language: "en",
-                temperatureFallbackCount: 0,
-                sampleLength: 128,
-                withoutTimestamps: true,
-                wordTimestamps: false,
-                suppressBlank: true
-            )
-            
-            let results = try await whisperKit.transcribe(
-                audioArray: chunkAudio,
-                decodeOptions: decodingOptions
+            let result = try await backend.transcribe(
+                audioData: chunkAudio, options: .default, isPreview: true
             )
 
             guard !Task.isCancelled, sessionID == processingSession, isStreaming else { return }
             
             let newText = TranscriptionSanitizer.sanitize(
-                results.map { $0.text }.joined(separator: " ")
+                result.text
             )
             
             updateStreamingText(newText)
@@ -200,28 +189,18 @@ class StreamingTranscriber: ObservableObject {
     }
     
     private func processFinalChunk() async {
-        guard let whisperKit = whisperKit else { return }
+        guard let backend else { return }
         guard audioBuffer.count >= minAudioLengthForProcessing else { return }
         
         let finalizingSession = sessionID
         do {
-            let decodingOptions = DecodingOptions(
-                verbose: false,
-                task: .transcribe,
-                language: "en",
-                withoutTimestamps: true,
-                wordTimestamps: false,
-                suppressBlank: true
+            let result = try await backend.transcribe(
+                audioData: audioBuffer, options: .default, isPreview: false
             )
-            
-            let results = try await whisperKit.transcribe(
-                audioArray: audioBuffer,
-                decodeOptions: decodingOptions
-            )
-            
+
             guard sessionID == finalizingSession else { return }
             let finalText = TranscriptionSanitizer.sanitize(
-                results.map { $0.text }.joined(separator: " ")
+                result.text
             )
             
             streamingState.confirmedText = finalText

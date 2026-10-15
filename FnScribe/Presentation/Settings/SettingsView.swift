@@ -409,10 +409,10 @@ struct ModelSettingsView: View {
     @EnvironmentObject var speechRecognizer: SpeechRecognizer
     
     @State private var showDeleteConfirmation = false
-    @State private var modelToDelete: WhisperModel?
+    @State private var modelToDelete: SpeechModel?
     @State private var operationError: String?
 
-    private var selectedModel: WhisperModel? {
+    private var selectedModel: SpeechModel? {
         modelManager.model(forName: settingsStore.selectedModel)
     }
     
@@ -450,7 +450,7 @@ struct ModelSettingsView: View {
                             .buttonStyle(.borderless)
                         }
                     }
-                    Text("Catalog models are available for this Mac. Downloaded models stay listed offline. English models work best for English; multilingual models support other languages.")
+                    Text("Parakeet Ultra and V3 support 25 languages with automatic language detection on Apple Silicon. Downloaded models work offline. Whisper models remain available for other languages.")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     if let catalogError = modelManager.catalogError {
@@ -551,7 +551,11 @@ struct ModelSettingsView: View {
     }
 
     private var currentStatus: String {
-        if speechRecognizer.isLoading { return "Loading model…" }
+        if speechRecognizer.isLoading {
+            return selectedModel?.isParakeet == true
+                ? "Preparing model for this Mac. The first load can take a few minutes."
+                : "Loading model…"
+        }
         if isSelectedModelLoaded { return "Ready for dictation" }
         guard let selectedModel else { return "Choose a model below" }
         return modelManager.isModelDownloaded(selectedModel)
@@ -564,7 +568,7 @@ struct ModelSettingsView: View {
             speechRecognizer.currentModelName == settingsStore.selectedModel
     }
 
-    private func activate(_ model: WhisperModel) {
+    private func activate(_ model: SpeechModel) {
         operationError = nil
         settingsStore.selectedModel = model.name
         modelManager.selectModel(model)
@@ -573,7 +577,7 @@ struct ModelSettingsView: View {
         }
     }
 
-    private func downloadAndActivate(_ model: WhisperModel) {
+    private func downloadAndActivate(_ model: SpeechModel) {
         operationError = nil
         Task {
             do {
@@ -587,7 +591,7 @@ struct ModelSettingsView: View {
 }
 
 struct ModelRowView: View {
-    let model: WhisperModel
+    let model: SpeechModel
     let isSelected: Bool
     let isDownloaded: Bool
     let isDownloading: Bool
@@ -607,7 +611,7 @@ struct ModelRowView: View {
                         .fontWeight(isSelected ? .semibold : .medium)
                     if isSelected { Text("Selected").font(.caption2).foregroundColor(.accentColor) }
                 }
-                Text("\(model.id)  ·  \(isDownloaded ? "Downloaded" : "Not downloaded")")
+                Text("\(model.detail)  ·  \(isDownloaded ? "Downloaded" : "Not downloaded")")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }

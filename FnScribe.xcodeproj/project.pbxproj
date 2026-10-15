@@ -7,6 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7A3000000000000000000001 /* FluidAudio in Frameworks */ = {isa = PBXBuildFile; productRef = 7A0000020000000000000002 /* FluidAudio */; };
+		7A3000000000000000000002 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = E6CF91022F29B00000EFDE32 /* WhisperKit */; };
+		7A200000000000000000000B /* SpeechRecognitionBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A100000000000000000000B /* SpeechRecognitionBackend.swift */; };
+		7A200000000000000000000A /* ModelManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A100000000000000000000A /* ModelManager.swift */; };
+		7A2000000000000000000005 /* ParakeetSupportTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A1000000000000000000005 /* ParakeetSupportTests.swift */; };
+		7A2000000000000000000004 /* StreamingState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A1000000000000000000004 /* StreamingState.swift */; };
+		7A2000000000000000000003 /* StreamingTranscriber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A1000000000000000000003 /* StreamingTranscriber.swift */; };
+		7A2000000000000000000002 /* SpeechTranscribing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A1000000000000000000002 /* SpeechTranscribing.swift */; };
+		7A2000000000000000000001 /* SpeechModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A1000000000000000000001 /* SpeechModel.swift */; };
+		7A0000010000000000000001 /* FluidAudio in Frameworks */ = {isa = PBXBuildFile; productRef = 7A0000020000000000000002 /* FluidAudio */; };
 		0F2000010000000000000001 /* AppBranding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1000010000000000000001 /* AppBranding.swift */; };
 		0F2000020000000000000002 /* AnalyticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1000020000000000000002 /* AnalyticsManager.swift */; };
 		0F2000030000000000000003 /* TaskManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F1000030000000000000003 /* TaskManager.swift */; };
@@ -37,6 +47,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		7A100000000000000000000B /* SpeechRecognitionBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribe/Infrastructure/Speech/SpeechRecognitionBackend.swift"; sourceTree = SOURCE_ROOT; };
+		7A100000000000000000000A /* ModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribe/Infrastructure/Models/ModelManager.swift"; sourceTree = SOURCE_ROOT; };
+		7A1000000000000000000005 /* ParakeetSupportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribeTests/ParakeetSupportTests.swift"; sourceTree = SOURCE_ROOT; };
+		7A1000000000000000000004 /* StreamingState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribe/Domain/Models/StreamingState.swift"; sourceTree = SOURCE_ROOT; };
+		7A1000000000000000000003 /* StreamingTranscriber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribe/Infrastructure/Speech/StreamingTranscriber.swift"; sourceTree = SOURCE_ROOT; };
+		7A1000000000000000000002 /* SpeechTranscribing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribe/Infrastructure/Speech/SpeechTranscribing.swift"; sourceTree = SOURCE_ROOT; };
+		7A1000000000000000000001 /* SpeechModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribe/Domain/Models/SpeechModel.swift"; sourceTree = SOURCE_ROOT; };
 		0F1000010000000000000001 /* AppBranding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FnScribe/Application/AppBranding.swift; sourceTree = "<group>"; };
 		0F1000020000000000000002 /* AnalyticsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FnScribe/Application/Managers/AnalyticsManager.swift; sourceTree = "<group>"; };
 		0F1000030000000000000003 /* TaskManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FnScribe/Application/Managers/TaskManager.swift; sourceTree = "<group>"; };
@@ -119,6 +136,8 @@
 			files = (
 				FE67EA592F39834AAB29D3EE /* Cocoa.framework in Frameworks */,
 				449482D25830F67E8BD5F3CD /* XCTest.framework in Frameworks */,
+				7A3000000000000000000001 /* FluidAudio in Frameworks */,
+				7A3000000000000000000002 /* WhisperKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -135,6 +154,7 @@
 			files = (
 				E6CF916A2F29ABA300EFDE32 /* HotKey in Frameworks */,
 				E6CF91692F29ABA300EFDE32 /* WhisperKit in Frameworks */,
+				7A0000010000000000000001 /* FluidAudio in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -168,6 +188,13 @@
 				06177123F5F32E8B1148C7AF /* TaskCaptureServiceTests.swift */,
 				3958524BB66BF9F15095DD9E /* TaskManagerTests.swift */,
 				A9A66511822B81CD1C02203B /* TranscriptionAndAnalyticsTests.swift */,
+				7A100000000000000000000B /* SpeechRecognitionBackend.swift */,
+				7A100000000000000000000A /* ModelManager.swift */,
+				7A1000000000000000000005 /* ParakeetSupportTests.swift */,
+				7A1000000000000000000004 /* StreamingState.swift */,
+				7A1000000000000000000003 /* StreamingTranscriber.swift */,
+				7A1000000000000000000002 /* SpeechTranscribing.swift */,
+				7A1000000000000000000001 /* SpeechModel.swift */,
 				0F10000D000000000000000D /* ClipboardPasteTransactionTests.swift */,
 			);
 			name = FnScribeTests;
@@ -232,6 +259,10 @@
 			dependencies = (
 			);
 			name = FnScribeTests;
+			packageProductDependencies = (
+				7A0000020000000000000002 /* FluidAudio */,
+				E6CF91022F29B00000EFDE32 /* WhisperKit */,
+			);
 			productName = FnScribeTests;
 			productReference = 6AD6AAEC44275A4AA3D61636 /* FnScribeTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -256,6 +287,7 @@
 			name = FnScribe;
 			packageProductDependencies = (
 				E6CF91022F29B00000EFDE32 /* WhisperKit */,
+				7A0000020000000000000002 /* FluidAudio */,
 				E6CF91032F29B00000EFDE32 /* HotKey */,
 			);
 			productName = FnScribe;
@@ -311,6 +343,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				E6CF91002F29B00000EFDE32 /* XCRemoteSwiftPackageReference "WhisperKit" */,
+				7A0000030000000000000003 /* XCRemoteSwiftPackageReference "FluidAudio" */,
 				E6CF91012F29B00000EFDE32 /* XCRemoteSwiftPackageReference "HotKey" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -355,6 +388,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				0F2000010000000000000001 /* AppBranding.swift in Sources */,
+				7A200000000000000000000B /* SpeechRecognitionBackend.swift in Sources */,
+				7A200000000000000000000A /* ModelManager.swift in Sources */,
+				7A2000000000000000000005 /* ParakeetSupportTests.swift in Sources */,
+				7A2000000000000000000004 /* StreamingState.swift in Sources */,
+				7A2000000000000000000003 /* StreamingTranscriber.swift in Sources */,
+				7A2000000000000000000002 /* SpeechTranscribing.swift in Sources */,
+				7A2000000000000000000001 /* SpeechModel.swift in Sources */,
 				0F2000020000000000000002 /* AnalyticsManager.swift in Sources */,
 				0F2000030000000000000003 /* TaskManager.swift in Sources */,
 				0F2000040000000000000004 /* TaskModels.swift in Sources */,
@@ -730,6 +770,11 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		7A0000030000000000000003 /* XCRemoteSwiftPackageReference "FluidAudio" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/FluidInference/FluidAudio.git";
+			requirement = {kind = exactVersion; version = 0.17.7; };
+		};
 		E6CF91002F29B00000EFDE32 /* XCRemoteSwiftPackageReference "WhisperKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/argmaxinc/WhisperKit";
@@ -749,6 +794,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		7A0000020000000000000002 /* FluidAudio */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 7A0000030000000000000003 /* XCRemoteSwiftPackageReference "FluidAudio" */;
+			productName = FluidAudio;
+		};
 		E6CF91022F29B00000EFDE32 /* WhisperKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = E6CF91002F29B00000EFDE32 /* XCRemoteSwiftPackageReference "WhisperKit" */;
