@@ -7,6 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8D200000000000000000000F /* DictionaryAndRefinementTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D100000000000000000000F /* DictionaryAndRefinementTests.swift */; };
+		8D200000000000000000000E /* DeveloperTermsDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D100000000000000000000E /* DeveloperTermsDatabase.swift */; };
+		8D200000000000000000000D /* CorrectionLearner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D100000000000000000000D /* CorrectionLearner.swift */; };
+		8D200000000000000000000C /* AppleSentenceRewriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D100000000000000000000C /* AppleSentenceRewriter.swift */; };
+		8D200000000000000000000B /* SystemGrammarCorrector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D100000000000000000000B /* SystemGrammarCorrector.swift */; };
+		8D200000000000000000000A /* UnusualWordDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D100000000000000000000A /* UnusualWordDetector.swift */; };
+		8D2000000000000000000009 /* SentenceRefiner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D1000000000000000000009 /* SentenceRefiner.swift */; };
+		8D2000000000000000000008 /* DictionaryManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D1000000000000000000008 /* DictionaryManager.swift */; };
+		8D2000000000000000000007 /* VocabularySuggestionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D1000000000000000000007 /* VocabularySuggestionStore.swift */; };
+		8D2000000000000000000006 /* DictionaryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D1000000000000000000006 /* DictionaryStore.swift */; };
+		8D2000000000000000000005 /* SentenceRefinementPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D1000000000000000000005 /* SentenceRefinementPolicy.swift */; };
+		8D2000000000000000000004 /* CorrectionDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D1000000000000000000004 /* CorrectionDetector.swift */; };
+		8D2000000000000000000003 /* DictionaryMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D1000000000000000000003 /* DictionaryMatcher.swift */; };
+		8D2000000000000000000002 /* VocabularySuggestion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D1000000000000000000002 /* VocabularySuggestion.swift */; };
+		8D2000000000000000000001 /* DictionaryEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D1000000000000000000001 /* DictionaryEntry.swift */; };
 		7A3000000000000000000001 /* FluidAudio in Frameworks */ = {isa = PBXBuildFile; productRef = 7A0000020000000000000002 /* FluidAudio */; };
 		7A3000000000000000000002 /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = E6CF91022F29B00000EFDE32 /* WhisperKit */; };
 		7A200000000000000000000B /* SpeechRecognitionBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7A100000000000000000000B /* SpeechRecognitionBackend.swift */; };
@@ -47,6 +62,21 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		8D100000000000000000000F /* DictionaryAndRefinementTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribeTests/DictionaryAndRefinementTests.swift"; sourceTree = SOURCE_ROOT; };
+		8D100000000000000000000E /* DeveloperTermsDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribe/Infrastructure/Dictionary/DeveloperTermsDatabase.swift"; sourceTree = SOURCE_ROOT; };
+		8D100000000000000000000D /* CorrectionLearner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribe/Infrastructure/Dictionary/CorrectionLearner.swift"; sourceTree = SOURCE_ROOT; };
+		8D100000000000000000000C /* AppleSentenceRewriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribe/Infrastructure/Dictionary/AppleSentenceRewriter.swift"; sourceTree = SOURCE_ROOT; };
+		8D100000000000000000000B /* SystemGrammarCorrector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribe/Infrastructure/Dictionary/SystemGrammarCorrector.swift"; sourceTree = SOURCE_ROOT; };
+		8D100000000000000000000A /* UnusualWordDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribe/Infrastructure/Dictionary/UnusualWordDetector.swift"; sourceTree = SOURCE_ROOT; };
+		8D1000000000000000000009 /* SentenceRefiner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribe/Application/Managers/SentenceRefiner.swift"; sourceTree = SOURCE_ROOT; };
+		8D1000000000000000000008 /* DictionaryManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribe/Application/Managers/DictionaryManager.swift"; sourceTree = SOURCE_ROOT; };
+		8D1000000000000000000007 /* VocabularySuggestionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribe/Application/Stores/VocabularySuggestionStore.swift"; sourceTree = SOURCE_ROOT; };
+		8D1000000000000000000006 /* DictionaryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribe/Application/Stores/DictionaryStore.swift"; sourceTree = SOURCE_ROOT; };
+		8D1000000000000000000005 /* SentenceRefinementPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribe/Domain/Services/SentenceRefinementPolicy.swift"; sourceTree = SOURCE_ROOT; };
+		8D1000000000000000000004 /* CorrectionDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribe/Domain/Services/CorrectionDetector.swift"; sourceTree = SOURCE_ROOT; };
+		8D1000000000000000000003 /* DictionaryMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribe/Domain/Services/DictionaryMatcher.swift"; sourceTree = SOURCE_ROOT; };
+		8D1000000000000000000002 /* VocabularySuggestion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribe/Domain/Models/VocabularySuggestion.swift"; sourceTree = SOURCE_ROOT; };
+		8D1000000000000000000001 /* DictionaryEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribe/Domain/Models/DictionaryEntry.swift"; sourceTree = SOURCE_ROOT; };
 		7A100000000000000000000B /* SpeechRecognitionBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribe/Infrastructure/Speech/SpeechRecognitionBackend.swift"; sourceTree = SOURCE_ROOT; };
 		7A100000000000000000000A /* ModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribe/Infrastructure/Models/ModelManager.swift"; sourceTree = SOURCE_ROOT; };
 		7A1000000000000000000005 /* ParakeetSupportTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "FnScribeTests/ParakeetSupportTests.swift"; sourceTree = SOURCE_ROOT; };
@@ -188,6 +218,21 @@
 				06177123F5F32E8B1148C7AF /* TaskCaptureServiceTests.swift */,
 				3958524BB66BF9F15095DD9E /* TaskManagerTests.swift */,
 				A9A66511822B81CD1C02203B /* TranscriptionAndAnalyticsTests.swift */,
+				8D100000000000000000000F /* DictionaryAndRefinementTests.swift */,
+				8D100000000000000000000E /* DeveloperTermsDatabase.swift */,
+				8D100000000000000000000D /* CorrectionLearner.swift */,
+				8D100000000000000000000C /* AppleSentenceRewriter.swift */,
+				8D100000000000000000000B /* SystemGrammarCorrector.swift */,
+				8D100000000000000000000A /* UnusualWordDetector.swift */,
+				8D1000000000000000000009 /* SentenceRefiner.swift */,
+				8D1000000000000000000008 /* DictionaryManager.swift */,
+				8D1000000000000000000007 /* VocabularySuggestionStore.swift */,
+				8D1000000000000000000006 /* DictionaryStore.swift */,
+				8D1000000000000000000005 /* SentenceRefinementPolicy.swift */,
+				8D1000000000000000000004 /* CorrectionDetector.swift */,
+				8D1000000000000000000003 /* DictionaryMatcher.swift */,
+				8D1000000000000000000002 /* VocabularySuggestion.swift */,
+				8D1000000000000000000001 /* DictionaryEntry.swift */,
 				7A100000000000000000000B /* SpeechRecognitionBackend.swift */,
 				7A100000000000000000000A /* ModelManager.swift */,
 				7A1000000000000000000005 /* ParakeetSupportTests.swift */,
@@ -388,6 +433,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				0F2000010000000000000001 /* AppBranding.swift in Sources */,
+				8D200000000000000000000F /* DictionaryAndRefinementTests.swift in Sources */,
+				8D200000000000000000000E /* DeveloperTermsDatabase.swift in Sources */,
+				8D200000000000000000000D /* CorrectionLearner.swift in Sources */,
+				8D200000000000000000000C /* AppleSentenceRewriter.swift in Sources */,
+				8D200000000000000000000B /* SystemGrammarCorrector.swift in Sources */,
+				8D200000000000000000000A /* UnusualWordDetector.swift in Sources */,
+				8D2000000000000000000009 /* SentenceRefiner.swift in Sources */,
+				8D2000000000000000000008 /* DictionaryManager.swift in Sources */,
+				8D2000000000000000000007 /* VocabularySuggestionStore.swift in Sources */,
+				8D2000000000000000000006 /* DictionaryStore.swift in Sources */,
+				8D2000000000000000000005 /* SentenceRefinementPolicy.swift in Sources */,
+				8D2000000000000000000004 /* CorrectionDetector.swift in Sources */,
+				8D2000000000000000000003 /* DictionaryMatcher.swift in Sources */,
+				8D2000000000000000000002 /* VocabularySuggestion.swift in Sources */,
+				8D2000000000000000000001 /* DictionaryEntry.swift in Sources */,
 				7A200000000000000000000B /* SpeechRecognitionBackend.swift in Sources */,
 				7A200000000000000000000A /* ModelManager.swift in Sources */,
 				7A2000000000000000000005 /* ParakeetSupportTests.swift in Sources */,

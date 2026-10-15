@@ -33,6 +33,8 @@ class SettingsWindowController {
             .environmentObject(dependencies.sessionManager)
             .environmentObject(dependencies.textInjectionService)
             .environmentObject(dependencies.dictionaryManager)
+            .environmentObject(dependencies.sentenceRefiner)
+            .environmentObject(dependencies.correctionLearner)
             .environmentObject(dependencies.inputFieldDetector)
             .environmentObject(dependencies.workspaceScanner)
             .environmentObject(dependencies.fileTagger)

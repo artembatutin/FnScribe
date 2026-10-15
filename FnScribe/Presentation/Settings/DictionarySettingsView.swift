@@ -11,26 +11,49 @@ import UniformTypeIdentifiers
 struct DictionarySettingsView: View {
     @EnvironmentObject var dictionaryManager: DictionaryManager
     @EnvironmentObject var settingsStore: SettingsStore
+    @EnvironmentObject var sentenceRefiner: SentenceRefiner
+    @EnvironmentObject var correctionLearner: CorrectionLearner
     
     @State private var showAddEntry: Bool = false
     @State private var showImportExport: Bool = false
     @State private var showLoadDeveloperTerms: Bool = false
     @State private var showClearConfirmation: Bool = false
     @State private var importResult: String?
+    @State private var showSuggestions = false
     
     var body: some View {
         VStack(spacing: 0) {
             headerView
             
+            Picker("Dictionary content", selection: $showSuggestions) {
+                Text("Entries (\(dictionaryManager.totalEntries))").tag(false)
+                Text("Suggestions (\(dictionaryManager.suggestions.count))").tag(true)
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal)
+            .padding(.bottom, 8)
+
+            if let error = dictionaryManager.lastError {
+                Text(error).font(.caption).foregroundColor(.red).padding(.horizontal)
+            }
             if dictionaryManager.isLoading {
                 ProgressView("Loading dictionary...")
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else if showSuggestions {
+                suggestionsListView
             } else {
                 entriesListView
             }
         }
         .task {
             await dictionaryManager.load()
+            sentenceRefiner.refreshAvailability()
+        }
+        .onChange(of: settingsStore.autoLearnCorrections) { _, enabled in
+            if !enabled { correctionLearner.stopMonitoring() }
+        }
+        .onChange(of: settingsStore.dictionaryEnabled) { _, enabled in
+            if !enabled { correctionLearner.stopMonitoring() }
         }
         .sheet(isPresented: $showAddEntry) {
             AddDictionaryEntryView()
@@ -47,6 +70,9 @@ struct DictionarySettingsView: View {
         .alert("Clear Dictionary", isPresented: $showClearConfirmation) {
             Button("Clear All", role: .destructive) {
                 dictionaryManager.clearAll()
+            }
+            Button("Clear Suggestions and Ignored Words") {
+                dictionaryManager.clearSuggestions()
             }
             Button("Clear Auto-Learned Only") {
                 dictionaryManager.clearAutoLearned()
@@ -67,9 +93,34 @@ struct DictionarySettingsView: View {
                 
                 Toggle("Auto-Learn", isOn: $settingsStore.autoLearnCorrections)
                     .toggleStyle(.switch)
-                    .help("Automatically learn corrections when you edit transcribed text")
+                    .help("Learn a related spelling change when you copy your corrected dictation within 30 seconds.")
+                    .disabled(!settingsStore.dictionaryEnabled)
             }
             
+            HStack {
+                Toggle("Suggest unusual words", isOn: $settingsStore.detectUnusualWords)
+                    .toggleStyle(.switch)
+                    .disabled(!settingsStore.dictionaryEnabled)
+                    .help("Collect unfamiliar words from dictation for you to review and add to your dictionary.")
+                Spacer()
+                Toggle("Refine sentences", isOn: $settingsStore.sentenceRefinementEnabled)
+                    .toggleStyle(.switch)
+                    .help("Fix grammar locally, adding Apple Intelligence sentence rewriting when available.")
+            }
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(alignment: .top) {
+                    Text(sentenceRefiner.modelAvailability)
+                        .font(.caption).foregroundColor(.secondary)
+                    Spacer(minLength: 8)
+                    Button("Refresh") { sentenceRefiner.refreshAvailability() }
+                        .buttonStyle(.borderless).font(.caption)
+                        .help("Check Apple Intelligence availability")
+                }
+                if settingsStore.sentenceRefinementEnabled, let status = sentenceRefiner.lastStatus {
+                    Text(status).font(.caption).foregroundColor(.secondary)
+                }
+            }
+
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Personal Dictionary")
@@ -122,6 +173,7 @@ struct DictionarySettingsView: View {
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.small)
+                    .disabled(!dictionaryManager.isLoaded)
                 }
             }
             
@@ -178,6 +230,31 @@ struct DictionarySettingsView: View {
         .padding()
     }
     
+    private var suggestionsListView: some View {
+        let search = dictionaryManager.searchText.lowercased()
+        let suggestions = dictionaryManager.suggestions.filter {
+            search.isEmpty || $0.word.lowercased().contains(search) || $0.context.lowercased().contains(search)
+        }
+        return Group {
+            if suggestions.isEmpty {
+                VStack(spacing: 10) {
+                    Image(systemName: "text.magnifyingglass").font(.largeTitle).foregroundColor(.secondary)
+                    Text("No vocabulary suggestions yet").font(.headline)
+                    Text("With unusual-word suggestions enabled, dictate normally. Unfamiliar names and words will appear here for review.")
+                        .font(.caption).foregroundColor(.secondary).multilineTextAlignment(.center)
+                }
+                .padding().frame(maxWidth: .infinity, maxHeight: .infinity)
+            } else {
+                List(suggestions) { suggestion in
+                    VocabularySuggestionRow(suggestion: suggestion,
+                        onAdd: { dictionaryManager.acceptSuggestion(suggestion, writtenForm: $0) },
+                        onIgnore: { dictionaryManager.ignoreSuggestion(suggestion) })
+                }
+                .listStyle(.inset)
+            }
+        }
+    }
+
     private var entriesListView: some View {
         Group {
             if dictionaryManager.filteredEntries.isEmpty {
@@ -477,5 +554,41 @@ struct EditDictionaryEntryView: View {
 #Preview {
     DictionarySettingsView()
         .environmentObject(DictionaryManager())
+        .environmentObject(SentenceRefiner())
+        .environmentObject(CorrectionLearner())
         .frame(width: 500, height: 450)
+}
+
+private struct VocabularySuggestionRow: View {
+    let suggestion: VocabularySuggestion
+    let onAdd: (String) -> Void
+    let onIgnore: () -> Void
+    @State private var writtenForm: String
+
+    init(suggestion: VocabularySuggestion, onAdd: @escaping (String) -> Void, onIgnore: @escaping () -> Void) {
+        self.suggestion = suggestion
+        self.onAdd = onAdd
+        self.onIgnore = onIgnore
+        _writtenForm = State(initialValue: suggestion.alternatives.first ?? suggestion.word)
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            HStack {
+                Text(suggestion.word).font(.headline)
+                Spacer()
+                Text("Heard \(suggestion.occurrences)×").font(.caption).foregroundColor(.secondary)
+            }
+            Text(suggestion.context).font(.caption).foregroundColor(.secondary).lineLimit(2)
+            HStack {
+                TextField("Written spelling", text: $writtenForm).textFieldStyle(.roundedBorder)
+                    .accessibilityLabel("Written spelling for \(suggestion.word)")
+                Button("Add correction") { onAdd(writtenForm) }
+                    .disabled(writtenForm.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                Button("Keep spelling") { onAdd(suggestion.word) }
+                Button("Ignore", action: onIgnore).buttonStyle(.borderless)
+            }
+        }
+        .padding(.vertical, 6)
+    }
 }

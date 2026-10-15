@@ -48,8 +48,9 @@ class CorrectionLearner: ObservableObject {
         
         clipboardMonitorTask = Task { [weak self] in
             while !Task.isCancelled {
-                try? await Task.sleep(nanoseconds: 500_000_000) // Check every 0.5 seconds
-                await self?.checkClipboardForCorrections()
+                do { try await Task.sleep(nanoseconds: 500_000_000) } catch { return }
+                guard !Task.isCancelled else { return }
+                self?.checkClipboardForCorrections()
             }
         }
     }
@@ -58,17 +59,22 @@ class CorrectionLearner: ObservableObject {
         isMonitoring = false
         clipboardMonitorTask?.cancel()
         clipboardMonitorTask = nil
+        lastInjectedText = nil
+        lastInjectionTime = nil
     }
     
     func recordInjection(_ text: String) {
         lastInjectedText = text
         lastInjectionTime = Date()
+        previousClipboardContent = NSPasteboard.general.string(forType: .string)
+        startMonitoring()
     }
     
     private func checkClipboardForCorrections() {
         guard let lastText = lastInjectedText,
               let lastTime = lastInjectionTime,
               Date().timeIntervalSince(lastTime) < correctionTimeWindow else {
+            stopMonitoring()
             return
         }
         
@@ -82,47 +88,17 @@ class CorrectionLearner: ObservableObject {
         if let correction = detectCorrection(original: lastText, edited: currentClipboard) {
             if correction.confidence >= minimumConfidence {
                 learn(from: correction)
+                // Consume the observation; copying again must not learn it twice.
+                stopMonitoring()
             }
         }
     }
     
     func detectCorrection(original: String, edited: String) -> CorrectionPair? {
-        let originalWords = original.split(separator: " ").map(String.init)
-        let editedWords = edited.split(separator: " ").map(String.init)
-        
-        guard originalWords.count == editedWords.count else {
-            return nil
-        }
-        
-        var corrections: [(original: String, corrected: String)] = []
-        
-        for (origWord, editWord) in zip(originalWords, editedWords) {
-            if origWord.lowercased() != editWord.lowercased() {
-                let similarity = stringSimilarity(origWord.lowercased(), editWord.lowercased())
-                if similarity > 0.3 && similarity < 1.0 {
-                    corrections.append((origWord, editWord))
-                }
-            }
-        }
-        
-        guard corrections.count == 1,
-              let correction = corrections.first else {
-            return nil
-        }
-        
-        let confidence = calculateConfidence(
-            original: correction.original,
-            corrected: correction.corrected,
-            contextLength: originalWords.count
-        )
-        
-        return CorrectionPair(
-            original: correction.original,
-            corrected: correction.corrected,
-            confidence: confidence
-        )
+        guard let change = CorrectionDetector.detect(original: original, edited: edited) else { return nil }
+        return CorrectionPair(original: change.original, corrected: change.corrected, confidence: change.confidence)
     }
-    
+
     func learn(from correction: CorrectionPair) {
         recentCorrections.insert(correction, at: 0)
         
@@ -134,65 +110,6 @@ class CorrectionLearner: ObservableObject {
             original: correction.original,
             corrected: correction.corrected
         )
-    }
-    
-    private func stringSimilarity(_ s1: String, _ s2: String) -> Double {
-        let longer = s1.count >= s2.count ? s1 : s2
-        let shorter = s1.count < s2.count ? s1 : s2
-        
-        if longer.isEmpty {
-            return 1.0
-        }
-        
-        let distance = levenshteinDistance(longer, shorter)
-        return Double(longer.count - distance) / Double(longer.count)
-    }
-    
-    private func levenshteinDistance(_ s1: String, _ s2: String) -> Int {
-        let s1Array = Array(s1)
-        let s2Array = Array(s2)
-        
-        var matrix = [[Int]](repeating: [Int](repeating: 0, count: s2Array.count + 1), count: s1Array.count + 1)
-        
-        for i in 0...s1Array.count {
-            matrix[i][0] = i
-        }
-        
-        for j in 0...s2Array.count {
-            matrix[0][j] = j
-        }
-        
-        for i in 1...s1Array.count {
-            for j in 1...s2Array.count {
-                let cost = s1Array[i - 1] == s2Array[j - 1] ? 0 : 1
-                matrix[i][j] = min(
-                    matrix[i - 1][j] + 1,
-                    matrix[i][j - 1] + 1,
-                    matrix[i - 1][j - 1] + cost
-                )
-            }
-        }
-        
-        return matrix[s1Array.count][s2Array.count]
-    }
-    
-    private func calculateConfidence(original: String, corrected: String, contextLength: Int) -> Double {
-        var confidence = 0.5
-        
-        let similarity = stringSimilarity(original.lowercased(), corrected.lowercased())
-        if similarity > 0.5 {
-            confidence += 0.2
-        }
-        
-        if contextLength > 3 {
-            confidence += 0.1
-        }
-        
-        if corrected.first?.isUppercase == true && original.first?.isLowercase == true {
-            confidence += 0.1
-        }
-        
-        return min(1.0, confidence)
     }
     
     func clearRecentCorrections() {

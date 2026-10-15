@@ -147,6 +147,9 @@ class SettingsStore: ObservableObject {
     @AppStorage("dictionaryEnabled") var dictionaryEnabled: Bool = true
     @AppStorage("autoLearnCorrections") var autoLearnCorrections: Bool = true
     
+    @AppStorage("detectUnusualWords") var detectUnusualWords: Bool = true
+    @AppStorage("sentenceRefinementEnabled") var sentenceRefinementEnabled: Bool = false
+
     // MARK: - Syntax Transformation Settings
     
     @AppStorage("syntaxTransformEnabled") var syntaxTransformEnabled: Bool = true
@@ -214,6 +217,8 @@ class SettingsStore: ObservableObject {
         launchAtLogin = false
         dictionaryEnabled = true
         autoLearnCorrections = true
+        detectUnusualWords = true
+        sentenceRefinementEnabled = false
         syntaxTransformEnabled = true
         caseTransformationsEnabled = true
         cliPatternsEnabled = true

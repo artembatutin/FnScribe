@@ -29,6 +29,7 @@ class AppDependencies {
     let sessionManager: SessionManager
     let dictionaryManager: DictionaryManager
     let correctionLearner: CorrectionLearner
+    let sentenceRefiner: SentenceRefiner
     let syntaxTransformer: SyntaxTransformer
     let workspaceScanner: WorkspaceScanner
     let fileTagger: FileTagger
@@ -115,6 +116,7 @@ class AppDependencies {
         // Initialize dictionary system
         self.dictionaryManager = DictionaryManager()
         self.correctionLearner = CorrectionLearner()
+        self.sentenceRefiner = SentenceRefiner()
         self.correctionLearner.dictionaryManager = dictionaryManager
         
         // Initialize syntax transformer
@@ -336,8 +338,11 @@ class AppDependencies {
                 let result = try await speechRecognizer.transcribe(audioBuffer: buffer)
                 var transcription = result.text
                 
-                // Apply personal dictionary replacements if enabled
                 if settingsStore.dictionaryEnabled {
+                    await dictionaryManager.load()
+                    if settingsStore.detectUnusualWords {
+                        await dictionaryManager.observeTranscript(transcription, language: result.language)
+                    }
                     transcription = dictionaryManager.applyDictionary(to: transcription)
                 }
 
@@ -383,7 +388,11 @@ class AppDependencies {
     }
 
     private func handleDictationCapture(_ transcription: String, targetApp: NSRunningApplication?) async throws {
-        var finalText = transcription
+        let protectedTerms = settingsStore.dictionaryEnabled ? dictionaryManager.protectedTerms(in: transcription) : []
+        let refined = await sentenceRefiner.refine(transcription, enabled: settingsStore.sentenceRefinementEnabled,
+                                                   protectedTerms: protectedTerms)
+        // Turning refinement off while a rewrite is running applies to this capture, too.
+        var finalText = settingsStore.sentenceRefinementEnabled ? refined : transcription
 
         if settingsStore.syntaxTransformEnabled {
             syntaxTransformer.caseTransformationsEnabled = settingsStore.caseTransformationsEnabled
@@ -437,8 +446,10 @@ class AppDependencies {
 
             try await textInjectionService.inject(text: finalText)
 
-            if settingsStore.autoLearnCorrections {
+            if settingsStore.dictionaryEnabled && settingsStore.autoLearnCorrections {
                 correctionLearner.recordInjection(finalText)
+            } else {
+                correctionLearner.stopMonitoring()
             }
         }
     }

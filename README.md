@@ -18,6 +18,8 @@ FnScribe is an AI-powered macOS dictation app that turns speech into polished, c
 
 ### **Personal Dictionary & Customization**
 - **Custom Vocabulary**: Add technical terms, acronyms, and project-specific words
+- **Vocabulary Suggestions**: Review unfamiliar words detected in dictation and save their preferred spelling
+- **Optional Sentence Refinement**: Toggle local grammar correction and available Apple Intelligence rewriting in Settings → Dictionary
 - **Syntax Transformation**: Convert spoken programming syntax to proper code format
 - **Context-Aware Suggestions**: AI-powered suggestions based on your coding context
 

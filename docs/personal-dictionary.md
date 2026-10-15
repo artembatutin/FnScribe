@@ -1,88 +1,79 @@
-# Feature 1.2 — Personal Dictionary System
+# Personal dictionary and sentence refinement
 
-## Overview
-The Personal Dictionary System lets FnScribe correct domain-specific transcription errors by applying user-managed spoken→written mappings. It supports:
+Open **Settings → Dictionary** to manage vocabulary and text cleanup. These settings
+apply to final dictation; the live speech preview remains a direct transcription.
 
-- Manual entry of custom terminology (names, frameworks, acronyms, etc.)
-- Automatic learning from user corrections after injection
-- Pre-loaded developer-oriented vocabulary
-- Import/export for portability
-- Integration with the transcription → injection pipeline
+## Settings
 
-## Core Components
-| Component | Location | Responsibility |
-|-----------|----------|----------------|
-| `DictionaryEntry` | `Domain/Models/DictionaryEntry.swift` | Data model with categories, auto-learn flag, usage stats |
-| `DictionaryStore` | `Application/Stores/DictionaryStore.swift` | Actor-based persistence (JSON under `~/Library/Application Support/FnScribe/dictionary.json`) |
-| `DictionaryManager` | `Application/Managers/DictionaryManager.swift` | CRUD, filtering, batch import/export, text replacement |
-| `CorrectionLearner` | `Infrastructure/Dictionary/CorrectionLearner.swift` | Watches clipboard after injection, infers corrections, feeds manager |
-| `DeveloperTermsDatabase` | `Infrastructure/Dictionary/DeveloperTermsDatabase.swift` | Canonical list of ~150 common dev terms |
-| `DictionarySettingsView` | `Presentation/Settings/DictionarySettingsView.swift` | Settings tab UI (search, filter, add/edit/delete, import/export) |
+| Setting | Default | Behavior |
+| --- | --- | --- |
+| Enable Dictionary | On | Apply saved spoken → written replacements and enable vocabulary learning. |
+| Auto-Learn | On | Learn a related spelling correction when you copy an edited version of the injected dictation within 30 seconds. |
+| Suggest unusual words | On | Collect unfamiliar words for review in the Suggestions tab. Requires Enable Dictionary. |
+| Refine sentences | Off | Correct grammar locally; add Apple Intelligence sentence rewriting when available. Independent of the dictionary toggle. |
 
-## Settings & Environment
-`SettingsStore` exposes two toggles:
+Turning refinement off passes the transcript through without calling either cleanup
+engine. Existing dictionary, code-formatting, file-tagging, and snippet settings still
+apply independently. Task commands keep their existing parsing and skip refinement.
 
-- `dictionaryEnabled` (default `true`): master switch for applying dictionary replacements.
-- `autoLearnCorrections` (default `true`): controls whether `CorrectionLearner` records injected text and creates auto-learned entries.
+## Vocabulary suggestions
 
-Both options are surfaced at the top of the Dictionary tab inside Settings.
+FnScribe checks final transcripts with the macOS spelling service, using the detected
+speech language when its spelling dictionary is installed. Unrecognized words can be
+names, specialist terminology, or transcription mistakes; they are offered for review.
+URLs, email addresses, paths, inline code, and already-known vocabulary are excluded.
 
-`AppDependencies` instantiates `DictionaryManager`/`CorrectionLearner`, wires them into `FnScribeApp`, and applies the dictionary before injection (respecting settings). The injected text is recorded for potential learning only when auto-learning is enabled.
+In **Suggestions**, each word includes its recent context, occurrence count, and an
+editable suggested spelling:
 
-## UI/UX Journey
-1. Open **Settings → Dictionary**.
-2. Toggle the dictionary/auto-learning switches.
-3. Use the search bar + category chips (Names, Technical, Acronym, Custom, Correction) to filter entries.
-4. Add entries via the “+” button, specifying spoken vs. written forms and category.
-5. Edit existing entries using the pencil icon (shows metadata like created/last used & usage count).
-6. Load developer terms through the overflow menu to seed baseline vocabulary.
-7. Import/export JSON files for backup or sharing.
-8. Clear auto-learned entries or wipe the entire dictionary via the overflow menu.
+- **Add correction** saves the heard word → the spelling you entered.
+- **Keep spelling** saves the word as vocabulary without changing its spelling.
+- **Ignore** dismisses it and suppresses future suggestions for that word.
 
-## Auto-Learning Pipeline
-1. After auto-injection succeeds, `AppDependencies` calls `CorrectionLearner.recordInjection(_:)` (if enabled).
-2. `CorrectionLearner` keeps a timestamped copy of the injected text for ~30 seconds.
-3. A clipboard monitor polls every 0.5s; if the user copies edited text that resembles the original, it calculates similarity and confidence.
-4. High-confidence single-word corrections produce `CorrectionPair`s (original vs corrected) that are added to the dictionary with category `.correction`/`isAutoLearned = true`.
-5. `DictionaryManager` persists the new entry and updates UI counts.
+The app retains up to 100 suggestions locally. The overflow menu can clear suggestions
+and reset ignored words. Suggestions and ignored words are saved separately in
+`~/Library/Application Support/FnScribe/dictionary_suggestions.json`; they are not
+included in dictionary exports.
 
-## Developer Terms
-`DeveloperTermsDatabase` groups entries into categories (frameworks, acronyms, platforms, tools, languages, common phrases). Loading them is idempotent—existing spoken forms are not duplicated.
+## Replacements and correction learning
 
-## Import/Export Format
-- Stored as prettified JSON array of `DictionaryEntry` objects.
-- Import supports merge mode (default) to avoid overwriting local entries.
-- Export writes to the user-selected location via `NSSavePanel`.
+Saved entries use the existing `dictionary.json` format and remain importable/exportable.
+The longest matching phrase wins. Matching respects Unicode word boundaries and supports
+terms such as `C++`, multiword phrases, and literal dollar signs or backslashes in the
+written form. Replacements do not trigger further replacements within the same pass.
+Usage counts update once per entry used in a dictation.
 
-Example payload:
-```json
-[
-  {
-    "id": "8B7F...",
-    "spokenForm": "super base",
-    "writtenForm": "Supabase",
-    "category": "custom",
-    "isAutoLearned": false,
-    "useCount": 0,
-    "createdAt": "2026-02-02T21:05:00Z",
-    "lastUsedAt": null
-  }
-]
-```
+Correction learning begins only after successful text insertion. Copy the corrected
+sentence within 30 seconds. A shared surrounding context and related spelling are
+required, including corrections that join or split a short phrase, such as
+“super base” → “Supabase”. Technical capitalization, such as “javascript” → “JavaScript”,
+can also be learned. Unrelated copies, changed quantities, and broad rewrites are rejected.
+Simply editing another app does not expose the edit to FnScribe; copying the corrected
+text is necessary. Turning the dictionary or auto-learning off stops monitoring.
 
-## Text Processing Behavior
-- Entries are sorted by descending spoken-form length before replacement to avoid partial overlaps.
-- Replacement uses word-boundary regex to avoid mid-word mutations.
-- Successful replacements increment `useCount` and update `lastUsedAt`.
+## Sentence refinement
 
-## Persistence Notes
-- The backing file lives at `~/Library/Application Support/FnScribe/dictionary.json`.
-- The actor cache keeps entries in-memory; all mutations go through `DictionaryStore.save(_:)` to remain consistent.
+The local grammar layer applies corrections offered by macOS and repairs common English
+dictation issues such as repeated function words, subject/verb agreement, and missing
+“be” in phrases such as “can toggled”. Its repairs are intentionally limited.
 
-## Extensibility Ideas
-- Add localization to the settings UI/help text.
-- Surface per-entry statistics (e.g., last IDE used) within the UI.
-- Enable bulk editing (CSV import) or remote sync.
-- Provide conflict resolution UI for duplicate spoken forms.
+On macOS 26 or later, an eligible Mac with Apple Intelligence enabled and its language
+model ready also gets sentence rewriting for broken sentence structure and flow. The
+status in Settings reports the current availability; **Refresh** checks it again after
+changing system settings. No account, API key, external server, or cloud fallback is used.
 
-This document captures the current implementation; update it when extending the dictionary system or integrating with new pipelines (e.g., streaming transcription).
+Refinement runs after dictionary replacements and before code formatting, file tagging,
+and snippet expansion. Dictionary spellings, reviewed/flagged vocabulary, numbers,
+negations, code identifiers, URLs, email addresses, paths, and inline code are protected.
+A rewrite that changes protected content is discarded in favor of grammar correction.
+If the model is unavailable, rejects a request, times out, or receives an overly long
+input, macOS grammar correction still runs. Language-model output can still be imperfect;
+the toggle allows you to keep the original speech wording whenever preferred.
+
+## Verification
+
+`DictionaryAndRefinementTests` covers literal/Unicode replacements, suggestion persistence,
+approval and ignoring, correction learning, exact toggle-off behavior, native spelling
+and grammar, current model availability, timeout/error fallback, and protected content.
+Run the regular `FnScribeTests` scheme. Native spelling/grammar tests need access to the
+macOS spelling service and should run outside a restricted execution sandbox.

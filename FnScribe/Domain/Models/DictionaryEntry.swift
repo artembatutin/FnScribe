@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct DictionaryEntry: Codable, Identifiable, Equatable, Hashable {
+nonisolated struct DictionaryEntry: Codable, Identifiable, Equatable, Hashable, Sendable {
     let id: UUID
     var spokenForm: String       // What user says: "super base"
     var writtenForm: String      // What gets typed: "Supabase"
@@ -17,7 +17,7 @@ struct DictionaryEntry: Codable, Identifiable, Equatable, Hashable {
     var createdAt: Date
     var lastUsedAt: Date?
     
-    enum Category: String, Codable, CaseIterable {
+    enum Category: String, Codable, CaseIterable, Sendable {
         case name           // People/company names
         case technical      // Programming terms
         case acronym        // API, SDK, CLI
